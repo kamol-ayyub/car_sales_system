@@ -35,6 +35,9 @@ export class Car {
   @Column({ type: 'enum', enum: CarStatus, default: CarStatus.AVAILABLE })
   status: CarStatus;
 
+  @Column({ type: 'text', array: true, default: '{}' })
+  images: string[];
+
   @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'sales_person_id' })
   salesPerson: User | null;
