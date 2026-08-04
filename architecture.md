@@ -10,7 +10,7 @@ Four actors interact with the system:
 - **Sales Person** — sees the shared inventory, sells any available car, and manages their clients.
 - **Owner** — sees everything: all cars, all clients, all sales people, and every transaction.
 
-The system is built around **three core entities** (car, client, sales person). A sale isn't a separate entity — it's a state of the car (`sold_at` + `client_id`), because one car is only ever sold once.
+The system is built around **two domain entities** — **car** and **user**. There is no separate client or sales-person table: both are users distinguished by a `role` column (`client` | `sales_person`). **Owner** is also just a user with `role = 'owner'` — a seeded row, not its own entity. A sale isn't a separate entity — it's a state of the car (`sold_at` + `client_id`), because one car is only ever sold once.
 
 ## System Overview
 
@@ -25,8 +25,7 @@ flowchart LR
     subgraph API [NestJS Backend]
         AUTH[Auth & Roles Guard]
         CAR[Cars Module]
-        CLI[Clients Module]
-        SP2[Sales Persons Module]
+        USER[User Module]
     end
 
     DB[(PostgreSQL)]
@@ -36,12 +35,10 @@ flowchart LR
     O --> AUTH
 
     AUTH --> CAR
-    AUTH --> CLI
-    AUTH --> SP2
+    AUTH --> USER
 
     CAR --> DB
-    CLI --> DB
-    SP2 --> DB
+    USER --> DB
 ```
 
 - All requests pass through **auth + role guard** first.
@@ -66,21 +63,17 @@ erDiagram
         timestamp sold_at
     }
 
-    CLIENT {
+    USER {
         int id PK
         string name
         string email UK
         string phone
+        string password_hash
+        enum role
     }
 
-    SALES_PERSON {
-        int id PK
-        string name
-        string email UK
-    }
-
-    CAR }o--|| SALES_PERSON : "sold by"
-    CAR }o--|| CLIENT : "bought by"
+    CAR }o--|| USER : "sold by"
+    CAR }o--|| USER : "bought by"
 ```
 
 ### Entities & Relationships
@@ -88,14 +81,14 @@ erDiagram
 | Entity | Purpose | Notes |
 |---|---|---|
 | **Car** | A car on the lot | `status`: `available` / `sold`. The whole lot is shared inventory for all sales persons. When sold, stores `client_id` + `sold_at` + the `sales_person_id` who closed the deal |
-| **Client** | A person who buys cars | Can buy multiple cars over time |
-| **Sales Person** | An employee who sells cars | Sees the shared inventory and can sell any available car |
+| **User** | Every actor: client, sales person, or owner | One table, `role` column (`client` / `sales_person` / `owner`). The owner is a seeded row with `role = 'owner'`. A client buys cars; a sales person sells from the shared inventory |
 
 ### Key Rules
 
 - **Inventory is shared** — every sales person sees the same full catalog of available cars and can sell any of them.
 - `sales_person_id` on a car is set when the car is **sold** — it records *who* closed the deal, not who "owns" the car.
 - A **sale is not a separate entity** — it's captured on the car via `client_id` + `sold_at`. This works because one car is sold **exactly once**.
+- **One `user` table** drives all roles — `role` gates access, so there's no separate client/sales-person/owner table. `client_id` and `sales_person_id` on a car are both FKs into `user`.
 - **Owner** sees all rows; **sales person** sees the shared inventory + their own clients; **client** sees the public catalog + own purchases.
 - If a sale history or audit trail is ever needed, a `Sale` table can be introduced later without changing the domain logic.
 
@@ -108,14 +101,12 @@ graph TD
     Auth[AuthModule<br/>login + JWT + roles guard]
 
     Car[CarsModule]
-    Client[ClientsModule]
-    SalesPerson[SalesPersonsModule]
+    User[UserModule]
 
     App --> Config
     App --> Auth
     App --> Car
-    App --> Client
-    App --> SalesPerson
+    App --> User
 ```
 
 Each feature module follows the standard NestJS pattern:
@@ -133,8 +124,7 @@ src/
 │   ├── auth.service.ts
 │   └── roles.guard.ts
 ├── cars/               # CRUD + catalog (public list) + sell action
-├── clients/
-└── sales-persons/
+├── user/               # one table for all roles; owner is a seeded row
 
     └── entities/       # TypeORM entities per module
 ```
@@ -152,6 +142,6 @@ src/
 
 | Role | Can do |
 |---|---|
-| **Owner** | Everything — all modules, no filters |
+| **Owner** | Everything — all modules, no filters (seeded `user` row with `role = 'owner'`) |
 | **Sales Person** | View/sell all cars in the inventory, manage their own clients |
 | **Client** | Browse car catalog, view own purchases |
