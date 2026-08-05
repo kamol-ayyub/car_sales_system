@@ -1,3 +1,4 @@
+import { CarStatus } from '@/car/entities/car.entity';
 import {
   ArrayMaxSize,
   IsArray,
@@ -13,7 +14,6 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { CarStatus } from '@/car/entities/car.entity';
 
 export class CreateCarDto {
   @IsString()

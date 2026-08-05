@@ -14,7 +14,7 @@ export enum CarStatus {
 
 @Entity('car')
 export class Car {
-  @PrimaryGeneratedColumn('increment')
+  @PrimaryGeneratedColumn('uuid')
   id: number;
 
   @Column({ type: 'varchar', length: 100 })
