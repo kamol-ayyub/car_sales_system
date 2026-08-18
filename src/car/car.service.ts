@@ -34,20 +34,15 @@ export class CarService {
   }
 
   async update(id: string, updateCarDto: UpdateCarDto): Promise<Car | null> {
-    try {
-      const car = await this.carRepository.preload({
-        id,
-        ...updateCarDto,
-      });
+    const car = await this.carRepository.preload({
+      id,
+      ...updateCarDto,
+    });
 
-      if (!car) {
-        throw new NotFoundException(`Car with id ${id} not found`);
-      }
-      return this.carRepository.save(car);
-    } catch (error) {
-      console.log('Error:', error);
-      throw new NotImplementedException();
+    if (!car) {
+      throw new NotFoundException(`Car with id ${id} not found`);
     }
+    return this.carRepository.save(car);
   }
 
   async remove(id: string): Promise<void> {
