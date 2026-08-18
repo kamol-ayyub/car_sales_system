@@ -30,7 +30,7 @@ describe('PasswordService', () => {
 
     const result = await service.hash(password);
 
-    expect(bcrypt.hash).toHaveBeenCalledWith(password, 10);
+    expect(bcrypt.hash).toHaveBeenCalledWith(password, 12);
     expect(result).toBe(mockHash);
   });
 
