@@ -41,13 +41,30 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
       const error = HTTP_ERRORS[status];
 
+      const exceptionResponse = exception.getResponse();
+
+      let message = error?.message;
+
+      if (typeof exceptionResponse === 'string') {
+        message = exceptionResponse;
+      } else if (exceptionResponse && typeof exceptionResponse === 'object') {
+        const body = exceptionResponse as {
+          message?: string | string[];
+          error?: string;
+        };
+
+        if (Array.isArray(body.message)) {
+          message = body.message.join(', ');
+        } else if (body.message && body.message !== body.error) {
+          message = body.message;
+        }
+      }
+
       return response.status(status).json({
         success: false,
         error: {
           code: error?.code ?? 'HTTP_ERROR',
-          message:
-            error?.message ??
-            'Something went wrong while processing your request.',
+          message: message ?? 'Something went wrong while processing your request.',
         },
       });
     }

@@ -9,6 +9,7 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  IsUUID,
   Length,
   Max,
   MaxLength,
@@ -49,4 +50,8 @@ export class CreateCarDto {
   @ArrayMaxSize(8)
   @IsUrl({ require_protocol: true }, { each: true })
   images?: string[];
+
+  @IsOptional()
+  @IsUUID()
+  salesPersonId?: string;
 }
