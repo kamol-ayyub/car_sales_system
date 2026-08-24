@@ -79,7 +79,7 @@ export class CarService {
         `Sales person with id ${userId} does not exist`,
       );
     }
-    if (user.role !== UserRole.SALES_PERSON) {
+    if (!user.roles.includes(UserRole.SALES_PERSON)) {
       throw new BadRequestException(
         `User with id ${userId} is not a sales person`,
       );
