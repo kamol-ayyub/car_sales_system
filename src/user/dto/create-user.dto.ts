@@ -1,5 +1,7 @@
 import { UserRole } from '@/user/entities/user.entity';
+import { Type } from 'class-transformer';
 import {
+  IsDate,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -34,4 +36,14 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(UserRole)
   role?: UserRole;
+
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  createdAt?: Date;
+
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  updatedAt?: Date;
 }

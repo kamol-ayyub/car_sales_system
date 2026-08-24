@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { CarController } from './car.controller';
 import { CarService } from './car.service';
 import { Car } from './entities/car.entity';
+import { User } from '@/user/entities/user.entity';
 
 describe('CarController', () => {
   let controller: CarController;
@@ -14,6 +15,10 @@ describe('CarController', () => {
         CarService,
         {
           provide: getRepositoryToken(Car),
+          useValue: {},
+        },
+        {
+          provide: getRepositoryToken(User),
           useValue: {},
         },
       ],

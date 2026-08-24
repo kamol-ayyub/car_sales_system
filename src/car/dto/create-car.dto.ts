@@ -1,7 +1,9 @@
 import { CarStatus } from '@/car/entities/car.entity';
+import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
+  IsDate,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -54,4 +56,14 @@ export class CreateCarDto {
   @IsOptional()
   @IsUUID()
   salesPersonId?: string;
+
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  createdAt?: Date;
+
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  updatedAt?: Date;
 }
