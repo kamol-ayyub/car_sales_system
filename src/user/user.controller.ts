@@ -6,11 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-
+import { Public } from './decorators/public.decorator';
+@Public()
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -27,7 +30,7 @@ export class UserController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+    return this.userService.findOne(id, 'id');
   }
 
   @Patch(':id')
@@ -35,6 +38,7 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);

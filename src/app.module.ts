@@ -3,6 +3,7 @@ import { AppService } from '@/app.service';
 import { CarModule } from '@/car/car.module';
 import { Car } from '@/car/entities/car.entity';
 import { appConfigSchema } from '@/config/config.types';
+import { authConfig } from '@/config/auth.config';
 import { TypedConfigService } from '@/config/typed-config.service';
 import { typeOrmConfig } from '@/config/typeorm.config';
 import { User } from '@/user/entities/user.entity';
@@ -24,7 +25,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [typeOrmConfig],
+      load: [typeOrmConfig, authConfig],
       validationSchema: appConfigSchema,
       validationOptions: {
         abortEarly: true,

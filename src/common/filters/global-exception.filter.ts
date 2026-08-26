@@ -64,10 +64,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         success: false,
         error: {
           code: error?.code ?? 'HTTP_ERROR',
-          message: message ?? 'Something went wrong while processing your request.',
+          message:
+            message ?? 'Something went wrong while processing your request.',
         },
       });
     }
+
+    console.log('exception', exception);
 
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
