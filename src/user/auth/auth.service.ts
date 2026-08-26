@@ -19,9 +19,8 @@ export class AuthService {
   ) {}
 
   public async register(createUserDto: CreateUserDto): Promise<User> {
-    const isUserExist = await this.usersService.findOne(
+    const isUserExist = await this.usersService.findByEmail(
       createUserDto.email,
-      'email',
     );
 
     if (isUserExist) {
@@ -34,7 +33,7 @@ export class AuthService {
   }
 
   public async login(email: string, password: string): Promise<string> {
-    const user = await this.usersService.findOne(email, 'email');
+    const user = await this.usersService.findByEmail(email);
 
     if (
       !user ||

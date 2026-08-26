@@ -70,8 +70,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       });
     }
 
-    console.log('exception', exception);
-
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       success: false,
       error: {
