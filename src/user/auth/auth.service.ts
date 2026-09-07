@@ -6,7 +6,7 @@ import {
 
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../dto/create-user.dto';
-import { User } from '../entities/user.entity';
+import { User, UserRole } from '../entities/user.entity';
 import { PasswordService } from '../password/password.service';
 import { UserService } from '../user.service';
 
@@ -27,7 +27,10 @@ export class AuthService {
       throw new ConflictException('Email already exists');
     }
 
-    const user = await this.usersService.create(createUserDto);
+    const user = await this.usersService.create({
+      ...createUserDto,
+      roles: [UserRole.CLIENT],
+    });
 
     return user;
   }

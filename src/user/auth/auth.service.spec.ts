@@ -61,7 +61,7 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    it('should create a user when email is not taken', async () => {
+    it('should create a user with CLIENT role when email is not taken', async () => {
       usersService.findByEmail.mockResolvedValue(null);
       usersService.create.mockResolvedValue(user);
 
@@ -70,8 +70,26 @@ describe('AuthService', () => {
       expect(usersService.findByEmail).toHaveBeenCalledWith(
         'john.doe@example.com',
       );
-      expect(usersService.create).toHaveBeenCalledWith(createUserDto);
+      expect(usersService.create).toHaveBeenCalledWith({
+        ...createUserDto,
+        roles: [UserRole.CLIENT],
+      });
       expect(result).toBe(user);
+    });
+
+    it('should force CLIENT role even if another role is passed', async () => {
+      usersService.findByEmail.mockResolvedValue(null);
+      usersService.create.mockResolvedValue(user);
+
+      await service.register({
+        ...createUserDto,
+        roles: [UserRole.OWNER],
+      });
+
+      expect(usersService.create).toHaveBeenCalledWith({
+        ...createUserDto,
+        roles: [UserRole.CLIENT],
+      });
     });
 
     it('should throw ConflictException when email is already taken', async () => {
