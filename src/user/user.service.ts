@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { User, UserRole } from './entities/user.entity';
 import { PasswordService } from './password/password.service';
 
 @Injectable()
@@ -35,7 +35,12 @@ export class UserService {
   }
 
   async findAll(): Promise<User[]> {
-    return this.userRepository.find();
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('NOT (:ownerRole = ANY(user.roles))', {
+        ownerRole: UserRole.OWNER,
+      })
+      .getMany();
   }
 
   async findOne(id: string, field: keyof User = 'id'): Promise<User> {
@@ -51,13 +56,25 @@ export class UserService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const updateData: Partial<User> = { ...updateUserDto };
+    if (updateUserDto.password) {
+      updateData.passwordHash = await this.passwordService.hash(
+        updateUserDto.password,
+      );
+    }
     const user = await this.userRepository.preload({
       id,
-      ...updateUserDto,
+      ...updateData,
     });
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
+    return this.userRepository.save(user);
+  }
+
+  async updateRole(id: string, roles: UserRole[]): Promise<User> {
+    const user = await this.findOne(id);
+    user.roles = roles;
     return this.userRepository.save(user);
   }
 

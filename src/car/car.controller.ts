@@ -11,7 +11,7 @@ import { CarService } from './car.service';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { Public } from '@/user/decorators/public.decorator';
-import { FindOneCarParams } from './car.params';
+import { FindOneParams } from '@/common/dto/find-one.params';
 
 @Controller('car')
 export class CarController {
@@ -30,20 +30,20 @@ export class CarController {
 
   @Public()
   @Get(':id')
-  findOne(@Param('id') { id }: FindOneCarParams) {
+  findOne(@Param() { id }: FindOneParams) {
     return this.carService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') { id }: FindOneCarParams,
+    @Param() { id }: FindOneParams,
     @Body() updateCarDto: UpdateCarDto,
   ) {
     return this.carService.update(id, updateCarDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') { id }: FindOneCarParams) {
+  remove(@Param() { id }: FindOneParams) {
     return this.carService.remove(id);
   }
 }

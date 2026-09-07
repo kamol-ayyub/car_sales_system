@@ -83,4 +83,50 @@ describe('UserService', () => {
       expect(userRepository.save).not.toHaveBeenCalled();
     });
   });
+
+  describe('findAll', () => {
+    it('should query users excluding owner role', async () => {
+      const mockQueryBuilder = {
+        where: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([
+          { id: 'u1', roles: [UserRole.CLIENT] },
+          { id: 'u2', roles: [UserRole.SALES_PERSON] },
+        ]),
+      };
+      userRepository.createQueryBuilder = jest
+        .fn()
+        .mockReturnValue(mockQueryBuilder);
+
+      const result = await service.findAll();
+
+      expect(userRepository.createQueryBuilder).toHaveBeenCalledWith('user');
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'NOT (:ownerRole = ANY(user.roles))',
+        { ownerRole: UserRole.OWNER },
+      );
+      expect(result).toHaveLength(2);
+    });
+  });
+
+  describe('updateRole', () => {
+    it('should update user roles and save', async () => {
+      const existingUser = {
+        id: 'u1',
+        roles: [UserRole.CLIENT],
+      } as User;
+      (userRepository.findOneBy as jest.Mock).mockResolvedValue(existingUser);
+      (userRepository.save as jest.Mock).mockImplementation((u) =>
+        Promise.resolve(u),
+      );
+
+      const result = await service.updateRole('u1', [UserRole.SALES_PERSON]);
+
+      expect(result.roles).toEqual([UserRole.SALES_PERSON]);
+      expect(userRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          roles: [UserRole.SALES_PERSON],
+        }),
+      );
+    });
+  });
 });
