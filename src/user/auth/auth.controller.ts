@@ -10,7 +10,7 @@ import {
   SerializeOptions,
 } from '@nestjs/common';
 import { Public } from '../decorators/public.decorator';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { RegisterDto } from './register.dto';
 import { User } from '../entities/user.entity';
 import { UserService } from '../user.service';
 import { AuthService } from './auth.service';
@@ -37,8 +37,8 @@ export class AuthController {
   @Post('register')
   @Public()
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() createUserDto: CreateUserDto): Promise<User> {
-    const user = await this.authService.register(createUserDto);
+  async register(@Body() registerDto: RegisterDto): Promise<User> {
+    const user = await this.authService.register(registerDto);
     return user;
   }
 

@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { PasswordService } from '../password/password.service';
 import { UserService } from '../user.service';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { RegisterDto } from './register.dto';
 import { User, UserRole } from '../entities/user.entity';
 
 describe('AuthService', () => {
@@ -24,7 +24,7 @@ describe('AuthService', () => {
     updatedAt: new Date(),
   };
 
-  const createUserDto: CreateUserDto = {
+  const registerDto: RegisterDto = {
     name: 'John Doe',
     email: 'john.doe@example.com',
     phone: null,
@@ -65,37 +65,22 @@ describe('AuthService', () => {
       usersService.findByEmail.mockResolvedValue(null);
       usersService.create.mockResolvedValue(user);
 
-      const result = await service.register(createUserDto);
+      const result = await service.register(registerDto);
 
       expect(usersService.findByEmail).toHaveBeenCalledWith(
         'john.doe@example.com',
       );
       expect(usersService.create).toHaveBeenCalledWith({
-        ...createUserDto,
+        ...registerDto,
         roles: [UserRole.CLIENT],
       });
       expect(result).toBe(user);
     });
 
-    it('should force CLIENT role even if another role is passed', async () => {
-      usersService.findByEmail.mockResolvedValue(null);
-      usersService.create.mockResolvedValue(user);
-
-      await service.register({
-        ...createUserDto,
-        roles: [UserRole.OWNER],
-      });
-
-      expect(usersService.create).toHaveBeenCalledWith({
-        ...createUserDto,
-        roles: [UserRole.CLIENT],
-      });
-    });
-
     it('should throw ConflictException when email is already taken', async () => {
       usersService.findByEmail.mockResolvedValue(user);
 
-      await expect(service.register(createUserDto)).rejects.toThrow(
+      await expect(service.register(registerDto)).rejects.toThrow(
         ConflictException,
       );
       expect(usersService.create).not.toHaveBeenCalled();

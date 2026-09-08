@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { RegisterDto } from './register.dto';
 import { User, UserRole } from '../entities/user.entity';
 import { PasswordService } from '../password/password.service';
 import { UserService } from '../user.service';
@@ -18,17 +18,15 @@ export class AuthService {
     private readonly passwordService: PasswordService,
   ) {}
 
-  public async register(createUserDto: CreateUserDto): Promise<User> {
-    const isUserExist = await this.usersService.findByEmail(
-      createUserDto.email,
-    );
+  public async register(registerDto: RegisterDto): Promise<User> {
+    const isUserExist = await this.usersService.findByEmail(registerDto.email);
 
     if (isUserExist) {
       throw new ConflictException('Email already exists');
     }
 
     const user = await this.usersService.create({
-      ...createUserDto,
+      ...registerDto,
       roles: [UserRole.CLIENT],
     });
 
