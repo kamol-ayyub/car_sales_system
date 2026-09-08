@@ -31,6 +31,15 @@ export class Car {
   @Column({ type: 'decimal', precision: 12, scale: 2 })
   price: number;
 
+  @Column({
+    name: 'sale_price',
+    type: 'decimal',
+    precision: 12,
+    scale: 2,
+    nullable: true,
+  })
+  salePrice: number | null;
+
   @Column({ type: 'varchar', length: 17, unique: true })
   vin: string;
 

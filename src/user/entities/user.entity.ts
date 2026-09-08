@@ -3,9 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Car } from '@/car/entities/car.entity';
 
 export enum UserRole {
   CLIENT = 'client',
@@ -39,6 +41,12 @@ export class User {
     default: [UserRole.CLIENT],
   })
   roles: UserRole[];
+
+  @OneToMany(() => Car, (car) => car.client)
+  purchases: Car[];
+
+  @OneToMany(() => Car, (car) => car.salesPerson)
+  sales: Car[];
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;

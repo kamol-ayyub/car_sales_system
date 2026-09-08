@@ -75,7 +75,7 @@ describe('UserService', () => {
       (userRepository.findOneBy as jest.Mock).mockResolvedValue({
         id: 'existing-id',
         email: createUserDto.email,
-      } as User);
+      });
 
       await expect(service.create(createUserDto)).rejects.toThrow(
         ConflictException,
