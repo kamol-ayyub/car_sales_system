@@ -23,38 +23,49 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Car sales system — a [Turborepo](https://turborepo.dev) monorepo (pnpm workspaces).
+
+## Project structure
+
+```bash
+apps/
+  server/   # NestJS API (PostgreSQL via docker-compose)
+  web/      # Vite + React app (will become the admin dashboard)
+packages/   # shared packages (empty for now)
+```
 
 ## Project setup
 
 ```bash
 $ pnpm install
+$ docker compose up -d   # start PostgreSQL
 ```
 
 ## Compile and run the project
 
 ```bash
-# development
-$ pnpm run start
+# start all apps in dev/watch mode (server + web)
+$ pnpm dev
 
-# watch mode
-$ pnpm run start:dev
+# build all apps
+$ pnpm build
 
-# production mode
-$ pnpm run start:prod
+# run a single app
+$ pnpm --filter server dev
+$ pnpm --filter web dev
 ```
 
 ## Run tests
 
 ```bash
-# unit tests
-$ pnpm run test
+# all tests
+$ pnpm test
+
+# server unit tests only
+$ pnpm --filter server test
 
 # e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+$ pnpm --filter server test:e2e
 ```
 
 ## Deployment
