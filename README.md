@@ -30,8 +30,10 @@ Car sales system — a [Turborepo](https://turborepo.dev) monorepo (pnpm workspa
 ```bash
 apps/
   server/   # NestJS API (PostgreSQL via docker-compose)
-  web/      # Vite + React app (will become the admin dashboard)
-packages/   # shared packages (empty for now)
+  admin/    # Vite + React app (admin dashboard)
+  web/      # Next.js public client-facing app
+packages/
+  ui/       # Shared shadcn/ui components
 ```
 
 ## Project setup
@@ -44,7 +46,7 @@ $ docker compose up -d   # start PostgreSQL
 ## Compile and run the project
 
 ```bash
-# start all apps in dev/watch mode (server + web)
+# start all apps in dev/watch mode
 $ pnpm dev
 
 # build all apps
@@ -52,6 +54,7 @@ $ pnpm build
 
 # run a single app
 $ pnpm --filter server dev
+$ pnpm --filter admin dev
 $ pnpm --filter web dev
 ```
 
@@ -107,4 +110,5 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
 # car_sales_system
