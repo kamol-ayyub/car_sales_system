@@ -1,18 +1,18 @@
-import { refreshResponseSchema } from "@/shared/schemas/auth.schema";
-import { validateResponse } from "@/shared/hooks/api/validate-response";
+import { refreshResponseSchema } from '@/shared/schemas/auth.schema';
+import { validateResponse } from '@/shared/hooks/api/validate-response';
 import type {
   AxiosError,
   AxiosInstance,
   AxiosRequestConfig,
   InternalAxiosRequestConfig,
-} from "axios";
-import axios from "axios";
-import { setAxiosInstance } from "@repo/api";
+} from 'axios';
+import axios from 'axios';
+import { setAxiosInstance } from '@repo/api';
 
 export const config: AxiosRequestConfig = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000",
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
   headers: {
-    "ngrok-skip-browser-warning": "true",
+    'ngrok-skip-browser-warning': 'true',
   },
 } as const;
 
@@ -32,40 +32,40 @@ const refreshAccessToken = async (): Promise<string | undefined> => {
     }>(
       `${config.baseURL}/auth/refresh`,
       {
-        oldRefreshToken: localStorage.getItem("refreshToken"),
+        oldRefreshToken: localStorage.getItem('refreshToken'),
       },
       { withCredentials: true, headers: config.headers },
     );
     const { accessToken, refreshToken } = validateResponse(
       response,
       refreshResponseSchema,
-      "/auth/refresh",
+      '/auth/refresh',
     ).data;
 
     // A refresh response without tokens is untrustworthy — force logout
     if (!accessToken || !refreshToken) {
-      throw new Error("Malformed refresh response: missing tokens");
+      throw new Error('Malformed refresh response: missing tokens');
     }
 
-    localStorage.setItem("refreshToken", refreshToken);
-    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('accessToken', accessToken);
 
     return accessToken;
   } catch {
     // Refresh token is invalid/expired — clear tokens and force logout
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    window.location.replace("/login");
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    window.location.replace('/login');
   }
 };
 
 // Attach access token to every request
 axiosInstance.interceptors.request.use(
   (reqConfig: InternalAxiosRequestConfig) => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = localStorage.getItem('accessToken');
 
     if (accessToken && reqConfig.headers) {
-      reqConfig.headers["Authorization"] = `Bearer ${accessToken}`;
+      reqConfig.headers['Authorization'] = `Bearer ${accessToken}`;
     }
     return reqConfig;
   },
@@ -88,7 +88,7 @@ axiosInstance.interceptors.response.use(
       const newToken = await refreshAccessToken();
 
       if (newToken) {
-        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+        originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
         return axiosInstance(originalRequest); // retry original request with new token
       }
     }

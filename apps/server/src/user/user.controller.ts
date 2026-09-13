@@ -53,7 +53,7 @@ export class UserController {
     return this.userService.updateRole(id, updateUserRoleDto.roles);
   }
 
-  @Public()
+  @Roles(UserRole.OWNER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   remove(@Param() { id }: FindOneParams) {
