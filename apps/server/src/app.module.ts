@@ -10,17 +10,21 @@ import { User } from '@/user/entities/user.entity';
 import { UserModule } from '@/user/user.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: TypedConfigService) => ({
-        ...configService.get('database'),
-        entities: [Car, User],
-      }),
+      useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
+        const dbConfig =
+          configService.get<TypeOrmModuleOptions>('database') ?? {};
+        return {
+          ...dbConfig,
+          entities: [Car, User],
+        };
+      },
     }),
 
     ConfigModule.forRoot({

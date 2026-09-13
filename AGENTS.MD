@@ -10,6 +10,7 @@ This project is a Turborepo monorepo using pnpm workspaces for a Car Sales Syste
 - `apps/admin` — React 19 internal dashboard built with Vite, TanStack Router, TanStack Query, Tailwind CSS, and shadcn/ui
 - `apps/web` — Public-facing client application built with Next.js, Tailwind CSS, and shadcn/ui
 - `packages/ui` — Shared shadcn/ui component library shared between `admin` and `web` apps
+- `packages/api` — Shared API client and TanStack Query hooks package (`@repo/api`) shared between `admin` and `web` apps
 
 ## Monorepo Layout
 
@@ -20,6 +21,7 @@ apps/
   web/                       # Next.js public client-facing app
 packages/
   ui/                        # Shared shadcn/ui components for admin and web apps
+  api/                       # Shared TanStack Query hooks and Axios client (@repo/api)
 ```
 
 ## Commands
@@ -81,16 +83,22 @@ pnpm --filter server seed     # Run database seed
 - shadcn/ui components reside in `packages/ui` and are imported into both `apps/admin` and `apps/web`.
 - Do not duplicate UI primitives across applications; place common inputs, buttons, dialogs, dropdowns, and tables in the shared UI package.
 
+### Shared API Package (`packages/api`)
+
+- Server communication logic is housed in `@repo/api` (`packages/api`), shared by both `apps/admin` and `apps/web`.
+- Exports configured Axios instance (`axiosInstance`, `axiosConfig`), TanStack Query generic hooks, and query client setup.
+- Uses Joi (`validateResponse`) for response validation.
+
 ### API hooks
 
-All server communication in the dashboard app uses four generic hooks in `apps/admin/src/shared/hooks/api/`:
+All server communication uses five generic hooks provided by `@repo/api` (imported directly into `apps/admin` and `apps/web`):
 
 - `useGetAllQuery(key, url, params?)` — wraps `useQuery`; cache key is `[key, params]`
 - `usePostQuery(url, invalidateKey?, options?)` — wraps `useMutation`; exposes `mutate` (single) and `mutateMany` (batch); invalidates cache on success
 - `usePutQuery` / `usePatchQuery` — same pattern for PUT/PATCH
 - `useDeleteQuery` — same pattern for DELETE; accepts custom `onSuccess`/`onError`
 
-Components call these hooks directly — no separate service layer exists.
+Components call these hooks directly from `@repo/api` — no separate service layer or duplicate local hooks exist.
 
 ### REST API
 
@@ -104,7 +112,7 @@ The backend is a NestJS REST API (`apps/server`). Endpoints follow standard REST
 
 ### Auth
 
-JWT authentication is used. The access token lives in `localStorage`. The Axios instance (`apps/admin/src/config/axios-config.ts`) attaches the Bearer token and redirects to `/login` on 401 responses. Auth state (user object, role) lives in Redux (`apps/admin/src/features/auth/store.ts`). Roles are `owner`, `sales_person`, and `client`. Everything else is React Query — Redux is not used for server state.
+JWT authentication is used. The access token lives in `localStorage`. The Axios instance (`axiosInstance` configured in `apps/admin/src/config/axios-config.ts`) attaches the Bearer token and redirects to `/login` on 401 responses. Roles are `owner`, `sales_person`, and `client`. Redux is NOT used — do not install or use Redux. Client auth state (if needed) lives in React context or local state. Everything else is React Query.
 
 ### Routing
 
@@ -139,13 +147,11 @@ JWT authentication is used. The access token lives in `localStorage`. The Axios 
 - Kebab-case for file names
 - PascalCase for component names
 - camelCase for variable and function names
-- Use `as const` objects instead of enums; use UPPERCASE for keys
 
 ## Comments & Documentation
 
 - Comment only non-obvious decisions
 - Comments should explain "why", not "what"
-- Use comments for section names in JSX/TSX markup
 
 ## Error handling & validation
 
@@ -192,12 +198,10 @@ JWT authentication is used. The access token lives in `localStorage`. The Axios 
 - Package Manager: pnpm (workspaces)
 - Formatter: Prettier
 
-### Shared Packages (`packages/ui`)
+### Shared Packages
 
-- Component Library: shadcn/ui (Radix UI + Tailwind CSS)
-- Form: React Hook Form
-- Validation: Joi
-- Icons: Lucide React (`lucide-react`)
+- **`packages/ui`**: Component Library with shadcn/ui (Radix UI + Tailwind CSS), Lucide React (`lucide-react`)
+- **`packages/api`**: Shared client library (`@repo/api`) with Axios, TanStack Query (`@tanstack/react-query`), and Joi response validation
 
 ### Frontend Dashboard (`apps/admin`)
 
@@ -210,7 +214,7 @@ JWT authentication is used. The access token lives in `localStorage`. The Axios 
 - Styling: Tailwind CSS
 - Forms: React Hook Form + shadcn Form
 - Validation: Joi
-- State Management: Redux Toolkit (use only if really necessary)
+- State Management: TanStack Query for server state; React Context / useState for client state (no Redux)
 - Utilities: lodash-es, date-fns, dayjs
 - Linter: Oxlint / ESLint
 - Type-checking: TypeScript
@@ -247,7 +251,6 @@ apps/admin/src/
 
   app/                       # App-level setup (not feature-specific)
     routes.tsx               # Route definitions (TanStack Router)
-    store.ts                 # Redux store setup
     query-client.ts          # TanStack Query client config
     query-provider.tsx       # TanStack Query provider
     pages/                   # Page-level components wired to routes
@@ -259,20 +262,17 @@ apps/admin/src/
       components/            # UI components scoped to this feature
       hooks/                 # Feature-specific hooks
       schemas/               # Joi schemas for this feature
-      store.ts               # Redux slice (if needed)
       types.ts               # Types scoped to this feature
 
   shared/                    # Cross-feature shared code
     constants/               # App-wide constants
-    hooks/                   # Shared custom hooks (e.g. API hooks)
-      api/                   # Generic TanStack Query wrappers
+    hooks/                   # Shared custom UI/utility hooks
     layout/                  # App shell, sidebar, header
       components/
     schemas/                 # Shared Joi schemas
     types/                   # Shared TypeScript types
     utils/                   # Shared utility functions
 
-  config/                    # Infrastructure config (axios, env, etc.)
   assets/                    # Static assets (images, svgs)
 ```
 

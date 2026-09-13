@@ -20,6 +20,8 @@ describe('AuthService', () => {
     phone: null,
     passwordHash: 'hashed',
     roles: [UserRole.CLIENT],
+    purchases: [],
+    sales: [],
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -27,7 +29,7 @@ describe('AuthService', () => {
   const registerDto: RegisterDto = {
     name: 'John Doe',
     email: 'john.doe@example.com',
-    phone: null,
+    phone: undefined,
     password: 'secret123',
   };
 

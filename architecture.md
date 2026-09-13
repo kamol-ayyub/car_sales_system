@@ -78,15 +78,15 @@ erDiagram
 
 ### Entities & Relationships
 
-| Entity | Purpose | Notes |
-|---|---|---|
-| **Car** | A car on the lot | `status`: `available` / `sold`. The whole lot is shared inventory for all sales persons. When sold, stores `client_id` + `sold_at` + the `sales_person_id` who closed the deal |
+| Entity   | Purpose                                     | Notes                                                                                                                                                                               |
+| -------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Car**  | A car on the lot                            | `status`: `available` / `sold`. The whole lot is shared inventory for all sales persons. When sold, stores `client_id` + `sold_at` + the `sales_person_id` who closed the deal      |
 | **User** | Every actor: client, sales person, or owner | One table, `role` column (`client` / `sales_person` / `owner`). The owner is a seeded row with `role = 'owner'`. A client buys cars; a sales person sells from the shared inventory |
 
 ### Key Rules
 
 - **Inventory is shared** — every sales person sees the same full catalog of available cars and can sell any of them.
-- `sales_person_id` on a car is set when the car is **sold** — it records *who* closed the deal, not who "owns" the car.
+- `sales_person_id` on a car is set when the car is **sold** — it records _who_ closed the deal, not who "owns" the car.
 - A **sale is not a separate entity** — it's captured on the car via `client_id` + `sold_at`. This works because one car is sold **exactly once**.
 - **One `user` table** drives all roles — `role` gates access, so there's no separate client/sales-person/owner table. `client_id` and `sales_person_id` on a car are both FKs into `user`.
 - **Owner** sees all rows; **sales person** sees the shared inventory + their own clients; **client** sees the public catalog + own purchases.
@@ -131,17 +131,17 @@ src/
 
 ## Tech Stack
 
-| Layer | Choice |
-|---|---|
-| Backend | NestJS (TypeScript) |
-| Database | PostgreSQL 16 (via docker-compose) |
-| ORM | TypeORM |
-| Auth | JWT + role-based guard (client / sales-person / owner) |
+| Layer    | Choice                                                 |
+| -------- | ------------------------------------------------------ |
+| Backend  | NestJS (TypeScript)                                    |
+| Database | PostgreSQL 16 (via docker-compose)                     |
+| ORM      | TypeORM                                                |
+| Auth     | JWT + role-based guard (client / sales-person / owner) |
 
 ## Roles Summary
 
-| Role | Can do |
-|---|---|
-| **Owner** | Everything — all modules, no filters (seeded `user` row with `role = 'owner'`) |
-| **Sales Person** | View/sell all cars in the inventory, manage their own clients |
-| **Client** | Browse car catalog, view own purchases |
+| Role             | Can do                                                                         |
+| ---------------- | ------------------------------------------------------------------------------ |
+| **Owner**        | Everything — all modules, no filters (seeded `user` row with `role = 'owner'`) |
+| **Sales Person** | View/sell all cars in the inventory, manage their own clients                  |
+| **Client**       | Browse car catalog, view own purchases                                         |

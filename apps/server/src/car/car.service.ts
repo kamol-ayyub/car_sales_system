@@ -26,9 +26,8 @@ export class CarService {
       ? await this.getSalesPerson(createCarDto.salesPersonId)
       : null;
 
-    const { salesPersonId, ...rest } = createCarDto;
     const car = this.carRepository.create({
-      ...rest,
+      ...createCarDto,
       salesPerson,
     });
     return this.carRepository.save(car);
