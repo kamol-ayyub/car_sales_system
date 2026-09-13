@@ -22,6 +22,7 @@ export class CarController {
   constructor(private readonly carService: CarService) {}
 
   @Post()
+  @Roles(UserRole.SALES_PERSON, UserRole.OWNER)
   create(@Body() createCarDto: CreateCarDto) {
     return this.carService.create(createCarDto);
   }
@@ -39,11 +40,13 @@ export class CarController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.SALES_PERSON, UserRole.OWNER)
   update(@Param() { id }: FindOneParams, @Body() updateCarDto: UpdateCarDto) {
     return this.carService.update(id, updateCarDto);
   }
 
   @Delete(':id')
+  @Roles(UserRole.SALES_PERSON, UserRole.OWNER)
   remove(@Param() { id }: FindOneParams) {
     return this.carService.remove(id);
   }

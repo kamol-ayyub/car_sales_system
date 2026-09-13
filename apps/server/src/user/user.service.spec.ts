@@ -58,6 +58,7 @@ describe('UserService', () => {
         id: 'uuid-1',
         ...createUserDto,
         passwordHash: 'hashedPassword',
+        tokenVersion: 0,
       } as User;
       (userRepository.create as jest.Mock).mockReturnValue(createdUser);
       (userRepository.save as jest.Mock).mockResolvedValue(createdUser);

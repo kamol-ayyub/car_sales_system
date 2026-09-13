@@ -32,7 +32,7 @@ const refreshAccessToken = async (): Promise<string | undefined> => {
     }>(
       `${config.baseURL}/auth/refresh`,
       {
-        oldRefreshToken: localStorage.getItem('refreshToken'),
+        refreshToken: localStorage.getItem('refreshToken'),
       },
       { withCredentials: true, headers: config.headers },
     );

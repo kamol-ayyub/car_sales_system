@@ -33,6 +33,15 @@ export class User {
   @Column({ name: 'password_hash', type: 'varchar', length: 255 })
   passwordHash: string;
 
+  @Exclude()
+  @Column({
+    name: 'refresh_token_hash',
+    type: 'varchar',
+    length: 64,
+    nullable: true,
+  })
+  refreshTokenHash: string | null;
+
   @Column({
     name: 'roles',
     type: 'enum',
@@ -41,6 +50,9 @@ export class User {
     default: [UserRole.CLIENT],
   })
   roles: UserRole[];
+
+  @Column({ name: 'token_version', type: 'int', default: 0 })
+  tokenVersion: number;
 
   @OneToMany(() => Car, (car) => car.client)
   purchases: Car[];

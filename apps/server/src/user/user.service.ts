@@ -51,30 +51,45 @@ export class UserService {
     return user;
   }
 
+  async findById(id: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ id });
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOneBy({ email });
   }
 
+  async incrementTokenVersion(id: string): Promise<void> {
+    await this.userRepository.increment({ id }, 'tokenVersion', 1);
+  }
+
+  async setRefreshTokenHash(
+    id: string,
+    refreshTokenHash: string | null,
+  ): Promise<void> {
+    await this.userRepository.update({ id }, { refreshTokenHash });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    const updateData: Partial<User> = { ...updateUserDto };
+    const user = await this.findOne(id);
     if (updateUserDto.password) {
-      updateData.passwordHash = await this.passwordService.hash(
+      user.passwordHash = await this.passwordService.hash(
         updateUserDto.password,
       );
+      user.tokenVersion += 1;
+      user.refreshTokenHash = null;
     }
-    const user = await this.userRepository.preload({
-      id,
-      ...updateData,
-    });
-    if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
-    }
+    const rest = { ...updateUserDto };
+    delete rest.password;
+    Object.assign(user, rest);
     return this.userRepository.save(user);
   }
 
   async updateRole(id: string, roles: UserRole[]): Promise<User> {
     const user = await this.findOne(id);
     user.roles = roles;
+    user.tokenVersion += 1;
+    user.refreshTokenHash = null;
     return this.userRepository.save(user);
   }
 

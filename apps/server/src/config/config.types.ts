@@ -18,4 +18,6 @@ export const appConfigSchema = Joi.object({
   JWT_ACCESS_EXPIRES_IN: Joi.string().required(),
   JWT_REFRESH_SECRET: Joi.string().min(32).required(),
   JWT_REFRESH_EXPIRES_IN: Joi.string().required(),
+  JWT_ISSUER: Joi.string().default('car-sales-system'),
+  JWT_AUDIENCE: Joi.string().default('car-sales-system'),
 });

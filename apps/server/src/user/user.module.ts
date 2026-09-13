@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth/auth.service';
 import { User } from './entities/user.entity';
@@ -16,6 +17,9 @@ import { AuthConfig } from '@/config/auth.config';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
+    ThrottlerModule.forRoot({
+      throttlers: [{ name: 'default', ttl: 60000, limit: 20 }],
+    }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -25,6 +29,12 @@ import { AuthConfig } from '@/config/auth.config';
           secret: auth?.jwt.accessSecret,
           signOptions: {
             expiresIn: auth?.jwt.accessExpiresIn as JwtSignOptions['expiresIn'],
+            issuer: auth?.jwt.issuer,
+            audience: auth?.jwt.audience,
+          },
+          verifyOptions: {
+            issuer: auth?.jwt.issuer,
+            audience: auth?.jwt.audience,
           },
         };
       },

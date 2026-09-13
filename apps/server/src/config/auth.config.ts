@@ -6,6 +6,8 @@ export interface AuthConfig {
     accessExpiresIn: string;
     refreshSecret: string;
     refreshExpiresIn: string;
+    issuer: string;
+    audience: string;
   };
 }
 
@@ -15,5 +17,7 @@ export const authConfig = registerAs('auth', (): AuthConfig => ({
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '10s',
     refreshSecret: process.env.JWT_REFRESH_SECRET as string,
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '1m',
+    issuer: process.env.JWT_ISSUER || 'car-sales-system',
+    audience: process.env.JWT_AUDIENCE || 'car-sales-system',
   },
 }));
