@@ -22,9 +22,9 @@ import { AuthConfig } from '@/config/auth.config';
       useFactory: (config: ConfigService): JwtModuleOptions => {
         const auth = config.get<AuthConfig>('auth');
         return {
-          secret: auth?.jwt.secret,
+          secret: auth?.jwt.accessSecret,
           signOptions: {
-            expiresIn: auth?.jwt.expiresIn as JwtSignOptions['expiresIn'],
+            expiresIn: auth?.jwt.accessExpiresIn as JwtSignOptions['expiresIn'],
           },
         };
       },

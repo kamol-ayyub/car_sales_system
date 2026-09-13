@@ -10,11 +10,18 @@ import axios from "axios";
 import { setAxiosInstance } from "@repo/api";
 
 export const config: AxiosRequestConfig = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://192.168.1.205:5217/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000",
   headers: {
     "ngrok-skip-browser-warning": "true",
   },
 } as const;
+
+const axiosInstance: AxiosInstance = axios.create({
+  baseURL: config.baseURL,
+  withCredentials: true,
+  headers: config.headers,
+});
+setAxiosInstance(axiosInstance);
 
 const refreshAccessToken = async (): Promise<string | undefined> => {
   try {
@@ -25,8 +32,7 @@ const refreshAccessToken = async (): Promise<string | undefined> => {
     }>(
       `${config.baseURL}/auth/refresh`,
       {
-        OldRefreshToken: localStorage.getItem("refreshToken"),
-        tenantId: "Demo", // tenantId currently required by backend, don't remove it!!
+        oldRefreshToken: localStorage.getItem("refreshToken"),
       },
       { withCredentials: true, headers: config.headers },
     );
@@ -52,12 +58,6 @@ const refreshAccessToken = async (): Promise<string | undefined> => {
     window.location.replace("/login");
   }
 };
-
-const axiosInstance: AxiosInstance = axios.create({
-  baseURL: config.baseURL,
-  withCredentials: true,
-  headers: config.headers,
-});
 
 // Attach access token to every request
 axiosInstance.interceptors.request.use(
@@ -96,7 +96,5 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   },
 );
-
-setAxiosInstance(axiosInstance);
 
 export { axiosInstance };

@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance } from 'axios';
+import axios, { type AxiosInstance } from "axios";
 
 let activeAxiosInstance: AxiosInstance = axios.create();
 

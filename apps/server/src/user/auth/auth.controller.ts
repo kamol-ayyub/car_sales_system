@@ -62,4 +62,14 @@ export class AuthController {
     }
     return user;
   }
+
+  @Public()
+  @Post('refresh')
+  async refreshToken(@Request() request: AuthRequest) {
+    const user = await this.userService.findOne(request.user.sub);
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+    return this.authService.refreshToken(user);
+  }
 }
