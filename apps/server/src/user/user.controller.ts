@@ -19,10 +19,16 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole } from './entities/user.entity';
 import { UserService } from './user.service';
 import type { TokenPayload } from './auth/auth.service';
+import { CurrentUserId } from './decorators/current-user-id.decorator';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get('me')
+  getme(@CurrentUserId() id: string) {
+    return this.userService.findById(id);
+  }
 
   @Post()
   @Roles(UserRole.OWNER)

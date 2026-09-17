@@ -5,29 +5,33 @@ import { z } from '@repo/api';
  * The app does not trust the backend: responses are validated against schemas.
  */
 
-/** POST /auth/signin — only tokens are read from the body. */
 export const signinResponseSchema = z
   .object({
     accessToken: z.string().nullable().optional(),
     refreshToken: z.string().nullable().optional(),
   })
-  .passthrough();
+  .loose();
 
-/** POST /auth/refresh — only tokens are read from the body. */
 export const refreshResponseSchema = z
   .object({
     accessToken: z.string().nullable().optional(),
     refreshToken: z.string().nullable().optional(),
   })
-  .passthrough();
+  .loose();
 
-/** GET /me — only the fields actually consumed are validated. */
+export const userRoleSchema = z.enum(['owner', 'sales_person', 'client']);
+
 export const meResponseSchema = z
   .object({
-    id: z.string().nullable().optional(),
-    email: z.string().nullable().optional(),
-    role: z.string().nullable().optional(),
-    firstName: z.string().nullable().optional(),
-    lastName: z.string().nullable().optional(),
+    id: z.string(),
+    name: z.string(),
+    email: z.string(),
+    phone: z.string().nullable().optional(),
+    roles: z.array(userRoleSchema),
+    tokenVersion: z.number().optional(),
+    createdAt: z.string().optional(),
+    updatedAt: z.string().optional(),
   })
-  .passthrough();
+  .loose();
+
+export type MeResponse = z.infer<typeof meResponseSchema>;

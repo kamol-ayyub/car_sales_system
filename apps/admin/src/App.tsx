@@ -18,7 +18,7 @@ const carSchema = z
     createdAt: z.string().optional(),
     updatedAt: z.string().optional(),
   })
-  .passthrough();
+  .loose();
 
 const carsResponseSchema = z.array(carSchema);
 

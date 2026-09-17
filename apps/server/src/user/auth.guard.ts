@@ -1,16 +1,16 @@
+import { AuthConfig } from '@/config/auth.config';
 import {
   CanActivate,
   ExecutionContext,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY } from './decorators/public.decorator';
-import { AuthConfig } from '@/config/auth.config';
 import { TokenPayload } from './auth/auth.service';
+import { IS_PUBLIC_KEY } from './decorators/public.decorator';
 import { UserService } from './user.service';
 
 @Injectable()

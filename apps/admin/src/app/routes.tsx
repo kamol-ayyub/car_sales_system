@@ -1,0 +1,166 @@
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  Outlet,
+  redirect,
+} from '@tanstack/react-router';
+import {
+  HomePage,
+  LoginPage,
+  NotFoundPage,
+  UnauthorizedPage,
+} from '@/app/pages';
+import { queryClient, validateResponse } from '@repo/api';
+import { axiosInstance } from '@/config/axios-config';
+import { meResponseSchema } from '@/shared/schemas/auth.schema';
+import { AppLayout } from '@/shared/layout/app-layout';
+import { RouteErrorFallback } from '@/shared/layout/components';
+import { UserRole, type UserDetails } from '@/shared/types/auth-types';
+import type { AxiosResponse } from 'axios';
+
+async function requireRole(role: UserRole | UserRole[]) {
+  const accessToken = localStorage.getItem('accessToken');
+  if (!accessToken) {
+    throw redirect({ to: '/login' });
+  }
+
+  let userDetails: UserDetails;
+  try {
+    const response = await queryClient.fetchQuery<AxiosResponse<UserDetails>>({
+      queryKey: ['user-details'],
+      queryFn: async () => {
+        const res = await axiosInstance.get<UserDetails>('/user/me', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+        return validateResponse(res, meResponseSchema, '/user/me');
+      },
+    });
+    userDetails = response.data;
+  } catch {
+    throw redirect({ to: '/login' });
+  }
+
+  const allowedRoles = Array.isArray(role) ? role : [role];
+  const userRoles = userDetails?.roles ?? [];
+
+  const hasAccess = userRoles.some((userRole) =>
+    allowedRoles.includes(userRole),
+  );
+  if (!hasAccess) {
+    throw redirect({ to: '/unauthorized' });
+  }
+}
+
+export const rootRoute = createRootRoute({
+  notFoundComponent: NotFoundPage,
+  component: () => <Outlet />,
+});
+
+export const layoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'layout',
+  notFoundComponent: NotFoundPage,
+  errorComponent: RouteErrorFallback,
+  component: () => (
+    <AppLayout>
+      <Outlet />
+    </AppLayout>
+  ),
+});
+
+export const authenticatedGuard = createRoute({
+  getParentRoute: () => layoutRoute,
+  id: 'authenticated-route',
+  notFoundComponent: NotFoundPage,
+  onError: () => {
+    router.navigate({ to: '/login' });
+  },
+  async beforeLoad() {
+    await requireRole([UserRole.Owner, UserRole.SalesPerson, UserRole.Client]);
+  },
+});
+
+export const ownerGuard = createRoute({
+  getParentRoute: () => layoutRoute,
+  id: 'owner-route',
+  notFoundComponent: NotFoundPage,
+  onError: () => {
+    router.navigate({ to: '/login' });
+  },
+  async beforeLoad() {
+    await requireRole(UserRole.Owner);
+  },
+});
+
+export const salesPersonGuard = createRoute({
+  getParentRoute: () => layoutRoute,
+  id: 'sales-person-route',
+  notFoundComponent: NotFoundPage,
+  onError: () => {
+    router.navigate({ to: '/login' });
+  },
+  async beforeLoad() {
+    await requireRole([UserRole.Owner, UserRole.SalesPerson]);
+  },
+});
+
+export const clientGuard = createRoute({
+  getParentRoute: () => layoutRoute,
+  id: 'client-route',
+  notFoundComponent: NotFoundPage,
+  onError: () => {
+    router.navigate({ to: '/login' });
+  },
+  async beforeLoad() {
+    await requireRole(UserRole.Client);
+  },
+});
+
+export const indexRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: '/',
+  beforeLoad: () => redirect({ to: '/home' }),
+});
+
+export const unauthorizedRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: '/unauthorized',
+  component: UnauthorizedPage,
+});
+
+export const homeRoute = createRoute({
+  getParentRoute: () => authenticatedGuard,
+  path: '/home',
+  component: HomePage,
+});
+
+export const loginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/login',
+  component: LoginPage,
+});
+
+const routeTree = rootRoute.addChildren([
+  layoutRoute.addChildren([
+    indexRoute,
+    unauthorizedRoute,
+    authenticatedGuard.addChildren([homeRoute]),
+    ownerGuard.addChildren([]),
+    salesPersonGuard.addChildren([]),
+    clientGuard.addChildren([]),
+  ]),
+  loginRoute,
+]);
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+export const router = createRouter({ routeTree });
+
+export { homeRoute as dashboardRoute };

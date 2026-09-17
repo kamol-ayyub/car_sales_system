@@ -12,8 +12,8 @@ async function bootstrap() {
   try {
     const userService = app.get(UserService);
 
-    const ownerEmail = process.env.INITIAL_OWNER_EMAIL || 'owner@carsales.com';
-    const ownerPassword = process.env.INITIAL_OWNER_PASSWORD || 'OwnerPass123!';
+    const ownerEmail = process.env.INITIAL_OWNER_EMAIL || 'owner@gmail.com';
+    const ownerPassword = process.env.INITIAL_OWNER_PASSWORD || 'Owner@123!';
 
     const existingOwner = await userService.findByEmail(ownerEmail);
 

@@ -18,7 +18,7 @@ import { AuthConfig } from '@/config/auth.config';
   imports: [
     TypeOrmModule.forFeature([User]),
     ThrottlerModule.forRoot({
-      throttlers: [{ name: 'default', ttl: 60000, limit: 20 }],
+      throttlers: [{ name: 'default', ttl: 60000, limit: 40 }],
     }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
