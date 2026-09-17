@@ -236,7 +236,7 @@ JWT authentication is used. The access token lives in `localStorage`. The Axios 
 - Database: PostgreSQL 16 (docker-compose)
 - ORM: TypeORM
 - Auth: JWT (Passport / Guards)
-- Validation: Zod, class-validator, class-transformer
+- Validation: Zod, nestjs-zod
 - Linter: ESLint
 - Testing: Jest (unit & e2e)
 

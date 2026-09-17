@@ -10,7 +10,9 @@ import { User } from '@/user/entities/user.entity';
 import { UserModule } from '@/user/user.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 
 @Module({
   imports: [
@@ -48,6 +50,14 @@ import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
     {
       provide: TypedConfigService,
       useExisting: ConfigService,
+    },
+    {
+      provide: APP_PIPE,
+      useClass: ZodValidationPipe,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ZodSerializerInterceptor,
     },
   ],
 })

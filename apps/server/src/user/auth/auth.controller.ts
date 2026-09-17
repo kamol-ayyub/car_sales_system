@@ -4,10 +4,10 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  SerializeOptions,
   UseGuards,
 } from '@nestjs/common';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { ZodSerializerDto } from 'nestjs-zod';
 import { Public } from '../decorators/public.decorator';
 import { RegisterDto } from './register.dto';
 import { AuthService } from './auth.service';
@@ -24,30 +24,27 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @SerializeOptions({ strategy: 'excludeAll' })
+  @ZodSerializerDto(LoginResponse)
   async register(@Body() registerDto: RegisterDto): Promise<LoginResponse> {
-    const tokens = await this.authService.register(registerDto);
-    return new LoginResponse(tokens);
+    return this.authService.register(registerDto);
   }
 
   @Public()
   @Post('login')
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @SerializeOptions({ strategy: 'excludeAll' })
+  @ZodSerializerDto(LoginResponse)
   async login(@Body() dto: LoginDto): Promise<LoginResponse> {
-    const tokens = await this.authService.login(dto.email, dto.password);
-    return new LoginResponse(tokens);
+    return this.authService.login(dto.email, dto.password);
   }
 
   @Public()
   @Post('refresh')
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
-  @SerializeOptions({ strategy: 'excludeAll' })
+  @ZodSerializerDto(LoginResponse)
   async refreshToken(@Body() dto: RefreshTokenDto): Promise<LoginResponse> {
-    const tokens = await this.authService.refreshTokens(dto.refreshToken);
-    return new LoginResponse(tokens);
+    return this.authService.refreshTokens(dto.refreshToken);
   }
 
   @Public()

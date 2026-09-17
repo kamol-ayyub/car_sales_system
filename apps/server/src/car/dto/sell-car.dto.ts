@@ -1,12 +1,9 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsUUID, Min } from 'class-validator';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-export class SellCarDto {
-  @IsUUID()
-  @IsNotEmpty()
-  clientId: string;
+export const sellCarSchema = z.object({
+  clientId: z.uuid(),
+  salePrice: z.coerce.number().min(0).optional(),
+});
 
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  salePrice?: number;
-}
+export class SellCarDto extends createZodDto(sellCarSchema) {}

@@ -1,4 +1,3 @@
-import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -29,11 +28,9 @@ export class User {
   @Column({ type: 'varchar', length: 20, nullable: true })
   phone: string | null;
 
-  @Exclude()
   @Column({ name: 'password_hash', type: 'varchar', length: 255 })
   passwordHash: string;
 
-  @Exclude()
   @Column({
     name: 'refresh_token_hash',
     type: 'varchar',
@@ -65,4 +62,16 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt: Date;
+
+  toJSON() {
+    return {
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      phone: this.phone,
+      roles: this.roles,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
 }

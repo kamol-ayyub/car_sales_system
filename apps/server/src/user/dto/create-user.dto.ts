@@ -1,39 +1,13 @@
 import { UserRole } from '@/user/entities/user.entity';
-import {
-  IsArray,
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-export class CreateUserDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(100)
-  name: string;
+export const createUserSchema = z.object({
+  name: z.string().min(1).max(100),
+  email: z.email().max(255),
+  phone: z.string().max(20).optional(),
+  password: z.string().min(8).max(72),
+  roles: z.array(z.enum(UserRole)).optional(),
+});
 
-  @IsEmail()
-  @IsNotEmpty()
-  @MaxLength(255)
-  email: string;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(20)
-  phone?: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(8)
-  @MaxLength(72)
-  password: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsEnum(UserRole, { each: true })
-  roles?: UserRole[];
-}
+export class CreateUserDto extends createZodDto(createUserSchema) {}

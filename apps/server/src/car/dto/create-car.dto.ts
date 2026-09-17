@@ -1,69 +1,18 @@
 import { CarStatus } from '@/car/entities/car.entity';
-import { Type } from 'class-transformer';
-import {
-  ArrayMaxSize,
-  IsArray,
-  IsDate,
-  IsEnum,
-  IsInt,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUrl,
-  IsUUID,
-  Length,
-  Max,
-  MaxLength,
-  Min,
-} from 'class-validator';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-export class CreateCarDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(100)
-  brand: string;
+export const createCarSchema = z.object({
+  brand: z.string().min(1).max(100),
+  model: z.string().min(1).max(100),
+  year: z.coerce.number().int().min(1886).max(2100),
+  price: z.coerce.number().min(0),
+  vin: z.string().length(17),
+  status: z.enum(CarStatus).optional(),
+  images: z.array(z.url()).max(8).optional(),
+  salesPersonId: z.uuid().optional(),
+  createdAt: z.coerce.date().optional(),
+  updatedAt: z.coerce.date().optional(),
+});
 
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(100)
-  model: string;
-
-  @IsInt()
-  @Min(1886)
-  @Max(2100)
-  year: number;
-
-  @IsNumber()
-  @Min(0)
-  price: number;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(17, 17)
-  vin: string;
-
-  @IsOptional()
-  @IsEnum({ enum: CarStatus, default: CarStatus.AVAILABLE })
-  status?: CarStatus;
-
-  @IsOptional()
-  @IsArray()
-  @ArrayMaxSize(8)
-  @IsUrl({ require_protocol: true }, { each: true })
-  images?: string[];
-
-  @IsOptional()
-  @IsUUID()
-  salesPersonId?: string;
-
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  createdAt?: Date;
-
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  updatedAt?: Date;
-}
+export class CreateCarDto extends createZodDto(createCarSchema) {}

@@ -1,8 +1,8 @@
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-export class FindOneParams {
-  @IsUUID()
-  @IsNotEmpty()
-  @IsString()
-  id: string;
-}
+export const findOneParamsSchema = z.object({
+  id: z.uuid(),
+});
+
+export class FindOneParams extends createZodDto(findOneParamsSchema) {}

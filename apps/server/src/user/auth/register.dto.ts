@@ -1,9 +1,11 @@
-import { PickType } from '@nestjs/mapped-types';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { createZodDto } from 'nestjs-zod';
+import { createUserSchema } from '../dto/create-user.dto';
 
-export class RegisterDto extends PickType(CreateUserDto, [
-  'name',
-  'email',
-  'phone',
-  'password',
-] as const) {}
+export const registerSchema = createUserSchema.pick({
+  name: true,
+  email: true,
+  phone: true,
+  password: true,
+});
+
+export class RegisterDto extends createZodDto(registerSchema) {}

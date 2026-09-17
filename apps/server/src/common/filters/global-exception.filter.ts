@@ -5,14 +5,40 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { ZodSerializationException, ZodValidationException } from 'nestjs-zod';
 import { QueryFailedError } from 'typeorm';
+import { ZodError } from 'zod';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(GlobalExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost) {
     const response = host.switchToHttp().getResponse<Response>();
+
+    if (exception instanceof ZodValidationException) {
+      const zodError = exception.getZodError();
+      const details = zodError instanceof ZodError ? zodError.issues : zodError;
+
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Please check the provided information.',
+          details,
+        },
+      });
+    }
+
+    if (exception instanceof ZodSerializationException) {
+      const zodError = exception.getZodError();
+      if (zodError instanceof ZodError) {
+        this.logger.error(`ZodSerializationException: ${zodError.message}`);
+      }
+    }
 
     if (exception instanceof QueryFailedError) {
       const postgresError = exception.driverError as {

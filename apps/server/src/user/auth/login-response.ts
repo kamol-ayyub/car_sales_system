@@ -1,12 +1,9 @@
-import { Expose } from 'class-transformer';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'zod';
 
-export class LoginResponse {
-  constructor(private readonly partial?: Partial<LoginResponse>) {
-    Object.assign(this, partial);
-  }
+export const loginResponseSchema = z.object({
+  accessToken: z.string(),
+  refreshToken: z.string(),
+});
 
-  @Expose()
-  accessToken: string;
-  @Expose()
-  refreshToken: string;
-}
+export class LoginResponse extends createZodDto(loginResponseSchema) {}

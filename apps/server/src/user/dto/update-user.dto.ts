@@ -1,6 +1,8 @@
-import { OmitType, PartialType } from '@nestjs/mapped-types';
-import { CreateUserDto } from './create-user.dto';
+import { createZodDto } from 'nestjs-zod';
+import { createUserSchema } from './create-user.dto';
 
-export class UpdateUserDto extends PartialType(
-  OmitType(CreateUserDto, ['roles'] as const),
-) {}
+export const updateUserSchema = createUserSchema
+  .omit({ roles: true })
+  .partial();
+
+export class UpdateUserDto extends createZodDto(updateUserSchema) {}
