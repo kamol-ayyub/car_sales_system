@@ -6,7 +6,7 @@ This file provides guidance for AI coding agents when working with code in this 
 
 This project is a Turborepo monorepo using pnpm workspaces for a Car Sales System:
 
-- `apps/server` — NestJS REST API with PostgreSQL, TypeORM, and Joi validation
+- `apps/server` — NestJS REST API with PostgreSQL, TypeORM, and Zod validation
 - `apps/admin` — React 19 internal dashboard built with Vite, TanStack Router, TanStack Query, Tailwind CSS, and shadcn/ui
 - `apps/web` — Public-facing client application built with Next.js, Tailwind CSS, and shadcn/ui
 - `packages/ui` — Shared shadcn/ui component library shared between `admin` and `web` apps
@@ -87,7 +87,7 @@ pnpm --filter server seed     # Run database seed
 
 - Server communication logic is housed in `@repo/api` (`packages/api`), shared by both `apps/admin` and `apps/web`.
 - Exports configured Axios instance (`axiosInstance`, `axiosConfig`), TanStack Query generic hooks, and query client setup.
-- Uses Joi (`validateResponse`) for response validation.
+- Uses Zod (`validateResponse`) for response validation.
 
 ### API hooks
 
@@ -106,9 +106,9 @@ The backend is a NestJS REST API (`apps/server`). Endpoints follow standard REST
 
 ### Validation
 
-- Use **Joi** for data validation across the system (already installed in `apps/server`).
-- In frontends, form and input validation schemas use Joi (e.g., via `@hookform/resolvers/joi` with React Hook Form) to ensure validation rules stay consistent with server schemas.
-- Avoid introducing additional validation libraries like Zod.
+- Use **Zod** for data validation across the system.
+- In frontends, form and input validation schemas use Zod (e.g., via `@hookform/resolvers/zod` with React Hook Form) to ensure validation rules stay consistent with server schemas.
+- Avoid introducing additional validation libraries.
 
 ### Auth
 
@@ -116,7 +116,7 @@ JWT authentication is used. The access token lives in `localStorage`. The Axios 
 
 ### Routing
 
-- `apps/admin/src/app/routes.tsx` defines all dashboard routes using TanStack Router with role guards: `ownerGuard` (Owner only), `salesPersonGuard` (Sales Person or Owner), and `clientGuard` (Client). Search params are validated with Joi schemas.
+- `apps/admin/src/app/routes.tsx` defines all dashboard routes using TanStack Router with role guards: `ownerGuard` (Owner only), `salesPersonGuard` (Sales Person or Owner), and `clientGuard` (Client). Search params are validated with Zod schemas.
 - `apps/web` uses the Next.js App Router for public-facing catalog and vehicle browsing pages.
 - Page components in `apps/admin/src/app/pages/` are thin shells — feature components own the logic.
 
@@ -156,7 +156,7 @@ JWT authentication is used. The access token lives in `localStorage`. The Axios 
 ## Error handling & validation
 
 - Handle errors explicitly; never silently ignore failures
-- Validate external input at system boundaries (API, forms, webhooks) using Joi schemas
+- Validate external input at system boundaries (API, forms, webhooks) using Zod schemas
 - Do not catch errors unless they can be meaningfully handled
 - Error messages should include enough context to debug
 - Do not use try/catch unless you know exactly what exception you are handling
@@ -166,7 +166,7 @@ JWT authentication is used. The access token lives in `localStorage`. The Axios 
 - Use shadcn/ui components from the shared UI package (`packages/ui`) for both `apps/admin` and `apps/web`
 - Use Tailwind CSS for styling, spacing, flex, grid, and layout
 - Use React Hook Form with shadcn Form components for all forms
-- Use Joi for schema validation
+- Use Zod for schema validation
 - If unsure, ask before implementing
 - State assumptions clearly
 - Propose alternatives when trade-offs exist
@@ -201,7 +201,7 @@ JWT authentication is used. The access token lives in `localStorage`. The Axios 
 ### Shared Packages
 
 - **`packages/ui`**: Component Library with shadcn/ui (Radix UI + Tailwind CSS), Lucide React (`lucide-react`)
-- **`packages/api`**: Shared client library (`@repo/api`) with Axios, TanStack Query (`@tanstack/react-query`), and Joi response validation
+- **`packages/api`**: Shared client library (`@repo/api`) with Axios, TanStack Query (`@tanstack/react-query`), and Zod response validation
 
 ### Frontend Dashboard (`apps/admin`)
 
@@ -213,7 +213,7 @@ JWT authentication is used. The access token lives in `localStorage`. The Axios 
 - UI: shadcn/ui (from `packages/ui`)
 - Styling: Tailwind CSS
 - Forms: React Hook Form + shadcn Form
-- Validation: Joi
+- Validation: Zod
 - State Management: TanStack Query for server state; React Context / useState for client state (no Redux)
 - Utilities: lodash-es, date-fns, dayjs
 - Linter: Oxlint / ESLint
@@ -226,7 +226,7 @@ JWT authentication is used. The access token lives in `localStorage`. The Axios 
 - Language: TypeScript
 - UI: shadcn/ui (from `packages/ui`)
 - Styling: Tailwind CSS
-- Validation: Joi
+- Validation: Zod
 - Server State: TanStack Query (react-query)
 
 ### Backend (`apps/server`)
@@ -236,7 +236,7 @@ JWT authentication is used. The access token lives in `localStorage`. The Axios 
 - Database: PostgreSQL 16 (docker-compose)
 - ORM: TypeORM
 - Auth: JWT (Passport / Guards)
-- Validation: Joi, class-validator, class-transformer
+- Validation: Zod, class-validator, class-transformer
 - Linter: ESLint
 - Testing: Jest (unit & e2e)
 
@@ -261,7 +261,7 @@ apps/admin/src/
     <feature>/
       components/            # UI components scoped to this feature
       hooks/                 # Feature-specific hooks
-      schemas/               # Joi schemas for this feature
+      schemas/               # Zod schemas for this feature
       types.ts               # Types scoped to this feature
 
   shared/                    # Cross-feature shared code
@@ -269,7 +269,7 @@ apps/admin/src/
     hooks/                   # Shared custom UI/utility hooks
     layout/                  # App shell, sidebar, header
       components/
-    schemas/                 # Shared Joi schemas
+    schemas/                 # Shared Zod schemas
     types/                   # Shared TypeScript types
     utils/                   # Shared utility functions
 

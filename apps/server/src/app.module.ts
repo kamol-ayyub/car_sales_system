@@ -30,9 +30,12 @@ import { TypeOrmModule, type TypeOrmModuleOptions } from '@nestjs/typeorm';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [typeOrmConfig, authConfig],
-      validationSchema: appConfigSchema,
-      validationOptions: {
-        abortEarly: true,
+      validate: (config: Record<string, unknown>) => {
+        const result = appConfigSchema.safeParse(config);
+        if (!result.success) {
+          throw new Error(`Config validation error: ${result.error.message}`);
+        }
+        return result.data;
       },
     }),
     CarModule,

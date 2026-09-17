@@ -1,4 +1,4 @@
-import { Joi } from "@repo/api";
+import { z } from '@repo/api';
 
 /**
  * Auth response schemas.
@@ -6,22 +6,28 @@ import { Joi } from "@repo/api";
  */
 
 /** POST /auth/signin — only tokens are read from the body. */
-export const signinResponseSchema = Joi.object({
-  accessToken: Joi.string().allow(null, "").optional(),
-  refreshToken: Joi.string().allow(null, "").optional(),
-}).unknown(true);
+export const signinResponseSchema = z
+  .object({
+    accessToken: z.string().nullable().optional(),
+    refreshToken: z.string().nullable().optional(),
+  })
+  .passthrough();
 
 /** POST /auth/refresh — only tokens are read from the body. */
-export const refreshResponseSchema = Joi.object({
-  accessToken: Joi.string().allow(null, "").optional(),
-  refreshToken: Joi.string().allow(null, "").optional(),
-}).unknown(true);
+export const refreshResponseSchema = z
+  .object({
+    accessToken: z.string().nullable().optional(),
+    refreshToken: z.string().nullable().optional(),
+  })
+  .passthrough();
 
 /** GET /me — only the fields actually consumed are validated. */
-export const meResponseSchema = Joi.object({
-  id: Joi.string().allow(null, "").optional(),
-  email: Joi.string().allow(null, "").optional(),
-  role: Joi.string().allow(null, "").optional(),
-  firstName: Joi.string().allow(null, "").optional(),
-  lastName: Joi.string().allow(null, "").optional(),
-}).unknown(true);
+export const meResponseSchema = z
+  .object({
+    id: z.string().nullable().optional(),
+    email: z.string().nullable().optional(),
+    role: z.string().nullable().optional(),
+    firstName: z.string().nullable().optional(),
+    lastName: z.string().nullable().optional(),
+  })
+  .passthrough();

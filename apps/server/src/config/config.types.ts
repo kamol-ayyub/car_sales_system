@@ -1,5 +1,5 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import * as Joi from 'joi';
+import { z } from 'zod';
 import { AuthConfig } from './auth.config';
 
 export interface ConfigType {
@@ -7,17 +7,17 @@ export interface ConfigType {
   auth: AuthConfig;
 }
 
-export const appConfigSchema = Joi.object({
-  DB_HOST: Joi.string().default('localhost'),
-  DB_PORT: Joi.number().default(5432),
-  DB_USER: Joi.string().required(),
-  DB_PASSWORD: Joi.string().required(),
-  DB_DATABASE: Joi.string().required(),
-  DB_SYNC: Joi.number().valid(0, 1).required(),
-  JWT_ACCESS_SECRET: Joi.string().min(32).required(),
-  JWT_ACCESS_EXPIRES_IN: Joi.string().required(),
-  JWT_REFRESH_SECRET: Joi.string().min(32).required(),
-  JWT_REFRESH_EXPIRES_IN: Joi.string().required(),
-  JWT_ISSUER: Joi.string().default('car-sales-system'),
-  JWT_AUDIENCE: Joi.string().default('car-sales-system'),
+export const appConfigSchema = z.object({
+  DB_HOST: z.string().default('localhost'),
+  DB_PORT: z.coerce.number().default(5432),
+  DB_USER: z.string().min(1),
+  DB_PASSWORD: z.string().min(1),
+  DB_DATABASE: z.string().min(1),
+  DB_SYNC: z.coerce.number().refine((val) => val === 0 || val === 1),
+  JWT_ACCESS_SECRET: z.string().min(32),
+  JWT_ACCESS_EXPIRES_IN: z.string().min(1),
+  JWT_REFRESH_SECRET: z.string().min(32),
+  JWT_REFRESH_EXPIRES_IN: z.string().min(1),
+  JWT_ISSUER: z.string().default('car-sales-system'),
+  JWT_AUDIENCE: z.string().default('car-sales-system'),
 });

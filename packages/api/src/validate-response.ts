@@ -1,17 +1,17 @@
-import type { AxiosResponse } from "axios";
+import type { AxiosResponse } from 'axios';
+import type { ZodType } from 'zod';
 
-export interface ValidatableSchema {
-  validate: (
-    data: unknown,
-    options?: Record<string, unknown>,
-  ) => {
-    value?: unknown;
-    error?: unknown;
-  };
-}
+export type ValidatableSchema =
+  | ZodType
+  | {
+      safeParse: (
+        data: unknown,
+      ) =>
+        { success: true; data: unknown } | { success: false; error: unknown };
+    };
 
 /**
- * Validates an Axios response body against a Joi schema.
+ * Validates an Axios response body against a Zod schema.
  * If validation fails, throws the error to be handled by React Query.
  */
 export function validateResponse<T>(
@@ -21,15 +21,12 @@ export function validateResponse<T>(
 ): AxiosResponse<T> {
   if (!schema) return response;
 
-  const result = schema.validate(response.data, {
-    abortEarly: false,
-    stripUnknown: false,
-  });
+  const result = schema.safeParse(response.data);
 
-  if (result.error) {
-    console.error("Response validation failed", url, result.error);
+  if (!result.success) {
+    console.error('Response validation failed', url, result.error);
     throw result.error;
   }
 
-  return { ...response, data: (result.value ?? response.data) as T };
+  return { ...response, data: (result.data ?? response.data) as T };
 }
