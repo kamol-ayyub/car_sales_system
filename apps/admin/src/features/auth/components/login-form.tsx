@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { EyeIcon, EyeOffIcon, Loader2Icon } from 'lucide-react';
 import { getApiErrorMessage } from '@/shared/utils/get-api-error-message';
 import { usePostQuery } from '@repo/api';
 import { Button } from '@repo/ui/components/button';
 import { Input } from '@repo/ui/components/input';
-import { toast } from '@repo/ui/components/toast';
 import { useForm, zodResolver } from '@repo/ui/lib/form';
 import {
   loginFormSchema,
@@ -13,6 +12,9 @@ import {
 
 export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [capsLockOn, setCapsLockOn] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const formErrorRef = useRef<HTMLParagraphElement>(null);
   const {
     register,
     handleSubmit,
@@ -27,15 +29,28 @@ export const LoginForm = () => {
 
   const { mutate, isPending } = usePostQuery({ key: 'login' });
 
+  useEffect(() => {
+    if (formError) {
+      formErrorRef.current?.focus();
+    }
+  }, [formError]);
+
   const onSubmit = (params: LoginFormValues) => {
+    setFormError(null);
     mutate(
       { url: 'auth/login', attributes: params },
       {
         onError(error) {
-          toast.add({ title: getApiErrorMessage(error), type: 'error' });
+          setFormError(getApiErrorMessage(error));
         },
       },
     );
+  };
+
+  const handlePasswordKey = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (typeof event.getModifierState === 'function') {
+      setCapsLockOn(event.getModifierState('CapsLock'));
+    }
   };
 
   return (
@@ -66,8 +81,9 @@ export const LoginForm = () => {
                 autoComplete='email'
                 autoCapitalize='none'
                 spellCheck={false}
-                placeholder='admin@example.com'
                 autoFocus
+                required
+                aria-required='true'
                 aria-invalid={errors.email ? true : undefined}
                 aria-describedby={errors.email ? 'email-error' : undefined}
                 {...register('email')}
@@ -92,12 +108,16 @@ export const LoginForm = () => {
                   id='password'
                   type={showPassword ? 'text' : 'password'}
                   autoComplete='current-password'
-                  placeholder='••••••••'
-                  className='pr-10'
+                  spellCheck={false}
+                  required
+                  aria-required='true'
                   aria-invalid={errors.password ? true : undefined}
                   aria-describedby={
                     errors.password ? 'password-error' : undefined
                   }
+                  onKeyUp={handlePasswordKey}
+                  onKeyDown={handlePasswordKey}
+                  className='pr-11'
                   {...register('password')}
                 />
                 <button
@@ -105,7 +125,7 @@ export const LoginForm = () => {
                   onClick={() => setShowPassword((visible) => !visible)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   aria-pressed={showPassword}
-                  className='absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-r-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+                  className='absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50'
                 >
                   {showPassword ? (
                     <EyeOffIcon className='size-4' aria-hidden='true' />
@@ -114,6 +134,9 @@ export const LoginForm = () => {
                   )}
                 </button>
               </div>
+              {capsLockOn && (
+                <p className='text-sm text-foreground/70'>Caps Lock is on.</p>
+              )}
               {errors.password && (
                 <p
                   id='password-error'
@@ -125,6 +148,17 @@ export const LoginForm = () => {
               )}
             </div>
           </div>
+
+          {formError && (
+            <p
+              ref={formErrorRef}
+              tabIndex={-1}
+              role='alert'
+              className='rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive outline-none'
+            >
+              {formError}
+            </p>
+          )}
 
           <Button
             type='submit'

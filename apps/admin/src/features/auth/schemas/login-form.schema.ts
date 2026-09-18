@@ -2,12 +2,14 @@ import { z } from 'zod';
 
 export const loginFormSchema = z.object({
   email: z
-    .email({ error: 'Invalid email address' })
-    .min(1, 'Email is required'),
+    .string()
+    .trim()
+    .min(1, { error: 'Email is required' })
+    .pipe(z.email({ error: 'Invalid email address' })),
   password: z
     .string()
     .min(1, { error: 'Password is required' })
-    .max(100, { error: 'Password should be less then 100 characters' }),
+    .max(100, { error: 'Password must be 100 characters or fewer' }),
 });
 
 export type LoginFormValues = z.infer<typeof loginFormSchema>;
