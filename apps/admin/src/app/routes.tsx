@@ -20,21 +20,12 @@ import { UserRole, type UserDetails } from '@/shared/types/auth-types';
 import type { AxiosResponse } from 'axios';
 
 async function requireRole(role: UserRole | UserRole[]) {
-  const accessToken = localStorage.getItem('accessToken');
-  if (!accessToken) {
-    throw redirect({ to: '/login' });
-  }
-
   let userDetails: UserDetails;
   try {
     const response = await queryClient.fetchQuery<AxiosResponse<UserDetails>>({
       queryKey: ['user-details'],
       queryFn: async () => {
-        const res = await axiosInstance.get<UserDetails>('/user/me', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        const res = await axiosInstance.get<UserDetails>('/user/me');
         return validateResponse(res, meResponseSchema, '/user/me');
       },
     });

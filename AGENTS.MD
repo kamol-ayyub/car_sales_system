@@ -112,7 +112,7 @@ The backend is a NestJS REST API (`apps/server`). Endpoints follow standard REST
 
 ### Auth
 
-JWT authentication is used. The access token lives in `localStorage`. The Axios instance (`axiosInstance` configured in `apps/admin/src/config/axios-config.ts`) attaches the Bearer token and redirects to `/login` on 401 responses. Roles are `owner`, `sales_person`, and `client`. Redux is NOT used — do not install or use Redux. Client auth state (if needed) lives in React context or local state. Everything else is React Query.
+JWT authentication is used. The refresh token is stored in an httpOnly, Secure, SameSite cookie. The access token lives in memory. The Axios instance (`axiosInstance` configured in `apps/admin/src/config/axios-config.ts`) attaches the Bearer token, refreshes via the cookie on 401, and redirects to `/login` when refresh fails. Roles are `owner`, `sales_person`, and `client`. Redux is NOT used — do not install or use Redux. Client auth state (if needed) lives in React context or local state. Everything else is React Query.
 
 ### Routing
 

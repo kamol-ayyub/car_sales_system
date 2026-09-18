@@ -23,47 +23,64 @@ const axiosInstance: AxiosInstance = axios.create({
 });
 setAxiosInstance(axiosInstance);
 
-const refreshAccessToken = async (): Promise<string | undefined> => {
+let accessToken: string | null = null;
+
+const AUTH_PATH_PATTERN = /\/auth\/(login|register|refresh|logout)(?:\?|$)/;
+
+let refreshRequest: Promise<string | undefined> | null = null;
+
+const isAuthRequest = (url?: string): boolean =>
+  Boolean(url && AUTH_PATH_PATTERN.test(url));
+
+const logoutAndRedirect = async (): Promise<void> => {
+  accessToken = null;
   try {
-    const response = await axios.post<{
-      accessToken: string;
-      refreshToken: string;
-      children: unknown;
-    }>(
-      `${config.baseURL}/auth/refresh`,
-      {
-        refreshToken: localStorage.getItem('refreshToken'),
-      },
+    await axios.post(
+      `${config.baseURL}/auth/logout`,
+      {},
       { withCredentials: true, headers: config.headers },
     );
-    const { accessToken, refreshToken } = validateResponse(
+  } catch {
+    // Continue logout even if the cookie is already gone.
+  }
+  window.location.replace('/login');
+};
+
+const requestNewAccessToken = async (): Promise<string | undefined> => {
+  try {
+    const response = await axios.post(
+      `${config.baseURL}/auth/refresh`,
+      {},
+      { withCredentials: true, headers: config.headers },
+    );
+    const { accessToken: token } = validateResponse(
       response,
       refreshResponseSchema,
       '/auth/refresh',
     ).data;
 
-    // A refresh response without tokens is untrustworthy — force logout
-    if (!accessToken || !refreshToken) {
-      throw new Error('Malformed refresh response: missing tokens');
+    if (!token) {
+      throw new Error('Malformed refresh response: missing access token');
     }
 
-    localStorage.setItem('refreshToken', refreshToken);
-    localStorage.setItem('accessToken', accessToken);
-
-    return accessToken;
+    accessToken = token;
+    return token;
   } catch {
-    // Refresh token is invalid/expired — clear tokens and force logout
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    window.location.replace('/login');
+    await logoutAndRedirect();
   }
 };
 
-// Attach access token to every request
+const refreshAccessToken = async (): Promise<string | undefined> => {
+  if (!refreshRequest) {
+    refreshRequest = requestNewAccessToken().finally(() => {
+      refreshRequest = null;
+    });
+  }
+  return refreshRequest;
+};
+
 axiosInstance.interceptors.request.use(
   (reqConfig: InternalAxiosRequestConfig) => {
-    const accessToken = localStorage.getItem('accessToken');
-
     if (accessToken && reqConfig.headers) {
       reqConfig.headers['Authorization'] = `Bearer ${accessToken}`;
     }
@@ -74,7 +91,6 @@ axiosInstance.interceptors.request.use(
   },
 );
 
-// On 401, silently refresh and retry the original request once
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -82,14 +98,18 @@ axiosInstance.interceptors.response.use(
       _retry?: boolean;
     };
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true; // prevent infinite retry loop
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isAuthRequest(originalRequest.url)
+    ) {
+      originalRequest._retry = true;
 
       const newToken = await refreshAccessToken();
 
       if (newToken) {
         originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-        return axiosInstance(originalRequest); // retry original request with new token
+        return axiosInstance(originalRequest);
       }
     }
 

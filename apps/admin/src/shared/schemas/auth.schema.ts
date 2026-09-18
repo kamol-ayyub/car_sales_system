@@ -5,19 +5,12 @@ import { z } from '@repo/api';
  * The app does not trust the backend: responses are validated against schemas.
  */
 
-export const signinResponseSchema = z
-  .object({
-    accessToken: z.string().nullable().optional(),
-    refreshToken: z.string().nullable().optional(),
-  })
-  .loose();
+export const accessTokenResponseSchema = z.object({
+  accessToken: z.string(),
+});
 
-export const refreshResponseSchema = z
-  .object({
-    accessToken: z.string().nullable().optional(),
-    refreshToken: z.string().nullable().optional(),
-  })
-  .loose();
+export const signinResponseSchema = accessTokenResponseSchema;
+export const refreshResponseSchema = accessTokenResponseSchema;
 
 export const userRoleSchema = z.enum(['owner', 'sales_person', 'client']);
 
@@ -28,7 +21,6 @@ export const meResponseSchema = z
     email: z.string(),
     phone: z.string().nullable().optional(),
     roles: z.array(userRoleSchema),
-    tokenVersion: z.number().optional(),
     createdAt: z.string().optional(),
     updatedAt: z.string().optional(),
   })

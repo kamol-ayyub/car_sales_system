@@ -12,12 +12,10 @@ export interface UserDetails {
   email: string;
   phone?: string | null;
   roles: UserRole[];
-  tokenVersion?: number;
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface AuthTokens {
   accessToken: string;
-  refreshToken: string;
 }
