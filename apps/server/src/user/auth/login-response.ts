@@ -1,8 +1,4 @@
 import { createZodDto } from 'nestjs-zod';
-import { z } from 'zod';
-
-export const loginResponseSchema = z.object({
-  accessToken: z.string(),
-});
+import { loginResponseSchema } from '@repo/api/login-response';
 
 export class LoginResponse extends createZodDto(loginResponseSchema) {}

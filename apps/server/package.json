@@ -22,6 +22,7 @@
     "seed": "ts-node -r tsconfig-paths/register src/seed.ts"
   },
   "dependencies": {
+    "@repo/api": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
@@ -73,7 +74,16 @@
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "module": "commonjs",
+            "moduleResolution": "node",
+            "resolvePackageJsonExports": false
+          }
+        }
+      ]
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
@@ -81,7 +91,8 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/$1"
+      "^@/(.*)$": "<rootDir>/$1",
+      "^@repo/api/login-response$": "<rootDir>/../../../packages/api/src/login-response.ts"
     }
   }
 }

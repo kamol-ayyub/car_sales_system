@@ -25,6 +25,10 @@ setAxiosInstance(axiosInstance);
 
 let accessToken: string | null = null;
 
+export const setAccessToken = (token: string | null): void => {
+  accessToken = token;
+};
+
 // Leading slash is optional: instance requests use relative URLs like 'auth/login'
 const AUTH_PATH_PATTERN = /^\/?auth\/(login|register|refresh|logout)(?:\?|$)/;
 
@@ -34,7 +38,7 @@ const isAuthRequest = (url?: string): boolean =>
   Boolean(url && AUTH_PATH_PATTERN.test(url));
 
 const logoutAndRedirect = async (): Promise<void> => {
-  accessToken = null;
+  setAccessToken(null);
   try {
     await axios.post(
       `${config.baseURL}/auth/logout`,
@@ -64,7 +68,7 @@ const requestNewAccessToken = async (): Promise<string | undefined> => {
       throw new Error('Malformed refresh response: missing access token');
     }
 
-    accessToken = token;
+    setAccessToken(token);
     return token;
   } catch {
     await logoutAndRedirect();

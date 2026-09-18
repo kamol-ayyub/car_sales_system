@@ -27,3 +27,7 @@ export { validateResponse, type ValidatableSchema } from './validate-response';
 export { setAxiosInstance, getAxiosInstance } from './axios-instance';
 export { queryClient, createQueryClient } from './query-client';
 export { z, type ZodType, type ZodSchema } from 'zod';
+export {
+  loginResponseSchema,
+  type LoginResponse,
+} from './login-response';

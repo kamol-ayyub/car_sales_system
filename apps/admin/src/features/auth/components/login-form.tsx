@@ -1,10 +1,15 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { EyeIcon, EyeOffIcon, Loader2Icon } from 'lucide-react';
 import { getApiErrorMessage } from '@/shared/utils/get-api-error-message';
-import { usePostQuery } from '@repo/api';
+import { setAccessToken } from '@/config/axios-config';
+import {
+  loginResponseSchema,
+  usePostQuery,
+  type LoginResponse,
+} from '@repo/api';
 import { Button } from '@repo/ui/components/button';
 import { Input } from '@repo/ui/components/input';
 import { useForm, zodResolver } from '@repo/ui/lib/form';
+import { EyeIcon, EyeOffIcon, Loader2Icon } from 'lucide-react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import {
   loginFormSchema,
   type LoginFormValues,
@@ -27,7 +32,10 @@ export const LoginForm = () => {
     },
   });
 
-  const { mutate, isPending } = usePostQuery({ key: 'login' });
+  const { mutate, isPending } = usePostQuery<LoginFormValues, LoginResponse>({
+    key: 'login',
+    schema: loginResponseSchema,
+  });
 
   useEffect(() => {
     if (formError) {
@@ -42,6 +50,9 @@ export const LoginForm = () => {
       {
         onError(error) {
           setFormError(getApiErrorMessage(error));
+        },
+        onSuccess(data) {
+          setAccessToken(data.data.accessToken);
         },
       },
     );
