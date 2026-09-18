@@ -25,7 +25,8 @@ setAxiosInstance(axiosInstance);
 
 let accessToken: string | null = null;
 
-const AUTH_PATH_PATTERN = /\/auth\/(login|register|refresh|logout)(?:\?|$)/;
+// Leading slash is optional: instance requests use relative URLs like 'auth/login'
+const AUTH_PATH_PATTERN = /^\/?auth\/(login|register|refresh|logout)(?:\?|$)/;
 
 let refreshRequest: Promise<string | undefined> | null = null;
 
@@ -43,7 +44,7 @@ const logoutAndRedirect = async (): Promise<void> => {
   } catch {
     // Continue logout even if the cookie is already gone.
   }
-  window.location.replace('/login');
+  // window.location.replace('/login');
 };
 
 const requestNewAccessToken = async (): Promise<string | undefined> => {

@@ -9,10 +9,13 @@
     "./lib/*": "./lib/*.ts"
   },
   "dependencies": {
-    "@radix-ui/react-icons": "^1.3.2",
-    "@radix-ui/react-slot": "^1.1.2",
+    "@base-ui/react": "^1.8.0",
+    "@hookform/resolvers": "^5.9.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cn": "^0.3.0",
+    "lucide-react": "^1.46.0",
+    "react-hook-form": "^7.88.0",
     "tailwind-merge": "^3.5.0"
   },
   "peerDependencies": {

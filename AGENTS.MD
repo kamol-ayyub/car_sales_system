@@ -79,7 +79,7 @@ pnpm --filter server seed     # Run database seed
 
 ### Shared UI Package (`packages/ui`)
 
-- UI components use **shadcn/ui** built on top of Radix UI primitives and Tailwind CSS.
+- UI components use **shadcn/ui** built on top of Base UI (`@base-ui/react`) primitives and Tailwind CSS. Composition uses Base UI's `render` prop (the former Radix `Slot`/`asChild` idiom).
 - shadcn/ui components reside in `packages/ui` and are imported into both `apps/admin` and `apps/web`.
 - Do not duplicate UI primitives across applications; place common inputs, buttons, dialogs, dropdowns, and tables in the shared UI package.
 
@@ -200,7 +200,7 @@ JWT authentication is used. The refresh token is stored in an httpOnly, Secure, 
 
 ### Shared Packages
 
-- **`packages/ui`**: Component Library with shadcn/ui (Radix UI + Tailwind CSS), Lucide React (`lucide-react`)
+- **`packages/ui`**: Component Library with shadcn/ui (Base UI + Tailwind CSS), Lucide React (`lucide-react`)
 - **`packages/api`**: Shared client library (`@repo/api`) with Axios, TanStack Query (`@tanstack/react-query`), and Zod response validation
 
 ### Frontend Dashboard (`apps/admin`)
