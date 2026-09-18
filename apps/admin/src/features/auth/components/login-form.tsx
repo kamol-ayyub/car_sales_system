@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { EyeIcon, EyeOffIcon, Loader2Icon } from 'lucide-react';
 import { getApiErrorMessage } from '@/shared/utils/get-api-error-message';
 import { usePostQuery } from '@repo/api';
 import { Button } from '@repo/ui/components/button';
@@ -10,6 +12,7 @@ import {
 } from '../schemas/login-form.schema';
 
 export const LoginForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -22,7 +25,7 @@ export const LoginForm = () => {
     },
   });
 
-  const { mutate } = usePostQuery({ key: 'login' });
+  const { mutate, isPending } = usePostQuery({ key: 'login' });
 
   const onSubmit = (params: LoginFormValues) => {
     mutate(
@@ -36,69 +39,113 @@ export const LoginForm = () => {
   };
 
   return (
-    <div className='flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8'>
-      <div className='w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-sm border border-gray-100'>
-        <div className='text-center'>
-          <h2 className='text-2xl font-bold tracking-tight text-gray-900'>
+    <main className='flex min-h-screen items-center justify-center bg-muted/40 px-4 py-12'>
+      <div className='w-full max-w-md space-y-8 rounded-xl border border-border bg-card p-8 shadow-sm'>
+        <header className='space-y-2 text-center'>
+          <h1 className='text-2xl font-semibold tracking-tight text-balance'>
             Sign in to your account
-          </h2>
-          <p className='mt-2 text-sm text-gray-600'>
+          </h1>
+          <p className='text-sm text-foreground/70'>
             Car Sales Management System
           </p>
-        </div>
+        </header>
 
-        <form className='mt-8 space-y-6' onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className='space-y-6'
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+        >
           <div className='space-y-4'>
-            <div>
-              <label
-                htmlFor='email'
-                className='block text-sm font-medium text-gray-700'
-              >
+            <div className='space-y-2'>
+              <label htmlFor='email' className='text-sm font-medium'>
                 Email address
               </label>
               <Input
                 id='email'
                 type='email'
                 autoComplete='email'
+                autoCapitalize='none'
+                spellCheck={false}
                 placeholder='admin@example.com'
-                className='mt-1'
+                autoFocus
+                aria-invalid={errors.email ? true : undefined}
+                aria-describedby={errors.email ? 'email-error' : undefined}
                 {...register('email')}
               />
               {errors.email && (
-                <p className='mt-1 text-sm text-red-600'>
+                <p
+                  id='email-error'
+                  role='alert'
+                  className='text-sm font-medium text-destructive'
+                >
                   {errors.email.message}
                 </p>
               )}
             </div>
 
-            <div>
-              <label
-                htmlFor='password'
-                className='block text-sm font-medium text-gray-700'
-              >
+            <div className='space-y-2'>
+              <label htmlFor='password' className='text-sm font-medium'>
                 Password
               </label>
-              <Input
-                id='password'
-                type='password'
-                autoComplete='current-password'
-                placeholder='••••••••'
-                className='mt-1'
-                {...register('password')}
-              />
+              <div className='relative'>
+                <Input
+                  id='password'
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete='current-password'
+                  placeholder='••••••••'
+                  className='pr-10'
+                  aria-invalid={errors.password ? true : undefined}
+                  aria-describedby={
+                    errors.password ? 'password-error' : undefined
+                  }
+                  {...register('password')}
+                />
+                <button
+                  type='button'
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                  className='absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-r-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+                >
+                  {showPassword ? (
+                    <EyeOffIcon className='size-4' aria-hidden='true' />
+                  ) : (
+                    <EyeIcon className='size-4' aria-hidden='true' />
+                  )}
+                </button>
+              </div>
               {errors.password && (
-                <p className='mt-1 text-sm text-red-600'>
+                <p
+                  id='password-error'
+                  role='alert'
+                  className='text-sm font-medium text-destructive'
+                >
                   {errors.password.message}
                 </p>
               )}
             </div>
           </div>
 
-          <Button type='submit' className='w-full'>
-            Sign in
+          <Button
+            type='submit'
+            className='w-full'
+            disabled={isPending}
+            aria-busy={isPending}
+          >
+            {isPending ? (
+              <>
+                <Loader2Icon
+                  className='animate-spin motion-reduce:animate-none'
+                  aria-hidden='true'
+                />
+                Signing in…
+              </>
+            ) : (
+              'Sign in'
+            )}
           </Button>
         </form>
       </div>
-    </div>
+    </main>
   );
 };
