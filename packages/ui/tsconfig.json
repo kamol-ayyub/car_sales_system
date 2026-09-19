@@ -14,5 +14,5 @@
       "@repo/ui/*": ["./*"]
     }
   },
-  "include": ["components", "lib", "styles"]
+  "include": ["components", "hooks", "lib", "styles"]
 }
