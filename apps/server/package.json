@@ -92,6 +92,7 @@
     "testEnvironment": "node",
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1",
+      "^@repo/api/car-status$": "<rootDir>/../../../packages/api/src/car-status.ts",
       "^@repo/api/login-response$": "<rootDir>/../../../packages/api/src/login-response.ts"
     }
   }

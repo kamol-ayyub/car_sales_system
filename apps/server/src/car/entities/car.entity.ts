@@ -7,12 +7,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { CarStatus } from '@repo/api/car-status';
 import { User } from '@/user/entities/user.entity';
-
-export enum CarStatus {
-  AVAILABLE = 'available',
-  SOLD = 'sold',
-}
 
 @Entity('car')
 export class Car {

@@ -1,5 +1,5 @@
-import { getApiErrorMessage } from '@/shared/utils/get-api-error-message';
 import { setAccessToken } from '@/config/axios-config';
+import { getApiErrorMessage } from '@/shared/utils/get-api-error-message';
 import {
   loginResponseSchema,
   usePostQuery,
@@ -8,6 +8,7 @@ import {
 import { Button } from '@repo/ui/components/button';
 import { Input } from '@repo/ui/components/input';
 import { useForm, zodResolver } from '@repo/ui/lib/form';
+import { useNavigate } from '@tanstack/react-router';
 import { EyeIcon, EyeOffIcon, Loader2Icon } from 'lucide-react';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import {
@@ -16,6 +17,7 @@ import {
 } from '../schemas/login-form.schema';
 
 export const LoginForm = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [capsLockOn, setCapsLockOn] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -53,6 +55,7 @@ export const LoginForm = () => {
         },
         onSuccess(data) {
           setAccessToken(data.data.accessToken);
+          navigate({ to: '/home' });
         },
       },
     );

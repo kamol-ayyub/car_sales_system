@@ -1,22 +1,53 @@
+import { useGetAllQuery } from '@repo/api';
+import { OwnerDashboard, SalespersonDashboard } from '@/features/dashboard';
+import { meResponseSchema } from '@/shared/schemas/auth.schema';
+import { UserRole, type UserDetails } from '@/shared/types/auth-types';
+
 export const HomePage = () => {
+  const { data, isError } = useGetAllQuery<UserDetails>({
+    key: 'user-details',
+    url: '/user/me',
+    schema: meResponseSchema,
+  });
+
+  const user = data?.data;
+
+  if (isError) {
+    return (
+      <p role='alert' className='text-sm text-muted-foreground'>
+        We couldn't load your account. Please refresh the page.
+      </p>
+    );
+  }
+
+  if (!user) {
+    return (
+      <p role='status' className='text-sm text-muted-foreground'>
+        Loading your dashboard…
+      </p>
+    );
+  }
+
+  const isSalesPersonView =
+    user.roles.includes(UserRole.SalesPerson) &&
+    !user.roles.includes(UserRole.Owner);
+
+  if (isSalesPersonView) {
+    return <SalespersonDashboard user={user} />;
+  }
+
+  if (user.roles.includes(UserRole.Owner)) {
+    return <OwnerDashboard />;
+  }
+
   return (
-    <div className='space-y-6'>
-      <div>
-        <h1 className='text-2xl font-bold tracking-tight text-gray-900'>
-          Dashboard
-        </h1>
-        <p className='text-sm text-gray-500'>
-          Welcome to the Car Sales System admin portal.
-        </p>
-      </div>
-      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-        <div className='rounded-lg border bg-white p-6 shadow-sm'>
-          <h3 className='text-sm font-medium text-gray-500'>System Status</h3>
-          <p className='mt-2 text-2xl font-semibold text-gray-900'>
-            Operational
-          </p>
-        </div>
-      </div>
+    <div className='flex flex-col gap-2'>
+      <h1 className='text-2xl font-semibold tracking-tight text-foreground'>
+        Welcome, {user.name}
+      </h1>
+      <p className='text-sm text-muted-foreground'>
+        Your client dashboard will appear here.
+      </p>
     </div>
   );
 };

@@ -1,31 +1,52 @@
 import type { ReactNode } from 'react';
-import { UserRole, type UserDetails } from '@/shared/types/auth-types';
-import { OwnerLayout } from './owner-layout';
-import { SalesLayout } from './sales-layout';
-import { ClientLayout } from './client-layout';
 import { useGetAllQuery } from '@repo/api';
 import { meResponseSchema } from '@/shared/schemas/auth.schema';
+import { UserRole, type UserDetails } from '@/shared/types/auth-types';
+import { AdminShell } from './admin-shell';
+import { ClientLayout } from './client-layout';
 
 interface AppLayoutProps {
   children?: ReactNode;
 }
 
 export const AppLayout = ({ children }: AppLayoutProps) => {
-  const { data } = useGetAllQuery<UserDetails>({
+  const { data, isError } = useGetAllQuery<UserDetails>({
     key: 'user-details',
     url: '/user/me',
     schema: meResponseSchema,
   });
 
-  const roles = data?.data?.roles ?? [];
+  const user = data?.data;
 
-  if (roles.includes(UserRole.SalesPerson)) {
-    return <SalesLayout>{children}</SalesLayout>;
+  if (isError) {
+    return (
+      <div
+        role='alert'
+        className='flex min-h-svh items-center justify-center p-6 text-center text-sm text-muted-foreground'
+      >
+        We couldn't load your account. Please refresh the page.
+      </div>
+    );
   }
 
-  if (roles.includes(UserRole.Client)) {
+  if (!user) {
+    return (
+      <div className='flex min-h-svh items-center justify-center p-6'>
+        <p role='status' className='text-sm text-muted-foreground'>
+          Loading your workspace…
+        </p>
+      </div>
+    );
+  }
+
+  const isClientOnly =
+    user.roles.includes(UserRole.Client) &&
+    !user.roles.includes(UserRole.SalesPerson) &&
+    !user.roles.includes(UserRole.Owner);
+
+  if (isClientOnly) {
     return <ClientLayout>{children}</ClientLayout>;
   }
 
-  return <OwnerLayout>{children}</OwnerLayout>;
+  return <AdminShell user={user}>{children}</AdminShell>;
 };

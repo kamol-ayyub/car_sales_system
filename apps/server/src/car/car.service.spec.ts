@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CarService } from './car.service';
-import { Car, CarStatus } from './entities/car.entity';
+import { CarStatus } from '@repo/api/car-status';
+import { Car } from './entities/car.entity';
 import { User, UserRole } from '@/user/entities/user.entity';
 
 describe('CarService', () => {

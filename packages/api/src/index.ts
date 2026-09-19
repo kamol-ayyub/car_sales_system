@@ -31,3 +31,4 @@ export {
   loginResponseSchema,
   type LoginResponse,
 } from './login-response';
+export { CarStatus, carStatusSchema } from './car-status';

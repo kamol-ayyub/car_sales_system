@@ -6,9 +6,15 @@ import {
   redirect,
 } from '@tanstack/react-router';
 import {
+  CustomersPage,
   HomePage,
+  InventoryPage,
   LoginPage,
   NotFoundPage,
+  ReportsPage,
+  SalesPage,
+  SalespeoplePage,
+  SettingsPage,
   UnauthorizedPage,
 } from '@/app/pages';
 import { queryClient, validateResponse } from '@repo/api';
@@ -128,6 +134,42 @@ export const homeRoute = createRoute({
   component: HomePage,
 });
 
+export const inventoryRoute = createRoute({
+  getParentRoute: () => authenticatedGuard,
+  path: '/inventory',
+  component: InventoryPage,
+});
+
+export const salesRoute = createRoute({
+  getParentRoute: () => authenticatedGuard,
+  path: '/sales',
+  component: SalesPage,
+});
+
+export const customersRoute = createRoute({
+  getParentRoute: () => authenticatedGuard,
+  path: '/customers',
+  component: CustomersPage,
+});
+
+export const settingsRoute = createRoute({
+  getParentRoute: () => authenticatedGuard,
+  path: '/settings',
+  component: SettingsPage,
+});
+
+export const salespeopleRoute = createRoute({
+  getParentRoute: () => ownerGuard,
+  path: '/salespeople',
+  component: SalespeoplePage,
+});
+
+export const reportsRoute = createRoute({
+  getParentRoute: () => ownerGuard,
+  path: '/reports',
+  component: ReportsPage,
+});
+
 export const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
@@ -138,8 +180,14 @@ const routeTree = rootRoute.addChildren([
   layoutRoute.addChildren([
     indexRoute,
     unauthorizedRoute,
-    authenticatedGuard.addChildren([homeRoute]),
-    ownerGuard.addChildren([]),
+    authenticatedGuard.addChildren([
+      homeRoute,
+      inventoryRoute,
+      salesRoute,
+      customersRoute,
+      settingsRoute,
+    ]),
+    ownerGuard.addChildren([salespeopleRoute, reportsRoute]),
     salesPersonGuard.addChildren([]),
     clientGuard.addChildren([]),
   ]),

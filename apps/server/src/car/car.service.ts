@@ -10,7 +10,8 @@ import { Repository } from 'typeorm';
 import { CreateCarDto } from './dto/create-car.dto';
 import { SellCarDto } from './dto/sell-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
-import { Car, CarStatus } from './entities/car.entity';
+import { CarStatus } from '@repo/api/car-status';
+import { Car } from './entities/car.entity';
 
 @Injectable()
 export class CarService {
