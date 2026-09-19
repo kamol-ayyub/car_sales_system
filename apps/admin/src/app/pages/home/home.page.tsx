@@ -1,5 +1,6 @@
 import { useGetAllQuery } from '@repo/api';
 import { OwnerDashboard, SalespersonDashboard } from '@/features/dashboard';
+import { Page } from '@/shared/components/page';
 import { meResponseSchema } from '@/shared/schemas/auth.schema';
 import { UserRole, type UserDetails } from '@/shared/types/auth-types';
 
@@ -41,13 +42,9 @@ export const HomePage = () => {
   }
 
   return (
-    <div className='flex flex-col gap-2'>
-      <h1 className='text-2xl font-semibold tracking-tight text-foreground'>
-        Welcome, {user.name}
-      </h1>
-      <p className='text-sm text-muted-foreground'>
-        Your client dashboard will appear here.
-      </p>
-    </div>
+    <Page
+      title={`Welcome, ${user.name}`}
+      description='Your client dashboard will appear here.'
+    />
   );
 };

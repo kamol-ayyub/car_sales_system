@@ -1,7 +1,6 @@
-import type { Car } from '@/shared/schemas/car.schema';
-import { formatCurrency } from '@/shared/utils/format-currency';
 import { CarStatus } from '@repo/api/car-status';
 import { Badge } from '@repo/ui/components/badge';
+import { Button } from '@repo/ui/components/button';
 import {
   Card,
   CardContent,
@@ -10,6 +9,7 @@ import {
 } from '@repo/ui/components/card';
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
@@ -24,6 +24,8 @@ import {
   TableRow,
 } from '@repo/ui/components/table';
 import { CheckIcon } from 'lucide-react';
+import type { Car } from '@/shared/schemas/car.schema';
+import { formatCurrency } from '@/shared/utils/format-currency';
 
 const carStatusLabels: Record<CarStatus, string> = {
   [CarStatus.AVAILABLE]: 'Available',
@@ -32,9 +34,17 @@ const carStatusLabels: Record<CarStatus, string> = {
 
 interface InventoryTableProps {
   cars: Car[];
+  isFiltered: boolean;
+  filterLabel?: string;
+  onClearFilter: () => void;
 }
 
-export const InventoryTable = ({ cars }: InventoryTableProps) => {
+export const InventoryTable = ({
+  cars,
+  isFiltered,
+  filterLabel,
+  onClearFilter,
+}: InventoryTableProps) => {
   return (
     <Card>
       <CardHeader>
@@ -42,16 +52,34 @@ export const InventoryTable = ({ cars }: InventoryTableProps) => {
       </CardHeader>
       <CardContent>
         {cars.length === 0 ? (
-          <Empty className='p-6'>
-            <EmptyHeader>
-              <EmptyTitle className='text-sm font-medium'>
-                No cars match this filter
-              </EmptyTitle>
-              <EmptyDescription>
-                Try a different status filter.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
+          isFiltered ? (
+            <Empty className='p-6'>
+              <EmptyHeader>
+                <EmptyTitle className='text-sm font-medium'>
+                  No {filterLabel?.toLowerCase()} cars
+                </EmptyTitle>
+                <EmptyDescription>
+                  Clear the filter to see the rest of the inventory.
+                </EmptyDescription>
+              </EmptyHeader>
+              <EmptyContent>
+                <Button variant='outline' size='sm' onClick={onClearFilter}>
+                  Clear filter
+                </Button>
+              </EmptyContent>
+            </Empty>
+          ) : (
+            <Empty className='p-6'>
+              <EmptyHeader>
+                <EmptyTitle className='text-sm font-medium'>
+                  No cars in inventory yet
+                </EmptyTitle>
+                <EmptyDescription>
+                  Cars added to inventory will appear here.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          )
         ) : (
           <Table>
             <TableCaption className='sr-only'>Inventory of cars</TableCaption>

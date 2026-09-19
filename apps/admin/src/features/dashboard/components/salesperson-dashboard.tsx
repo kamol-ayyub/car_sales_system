@@ -1,4 +1,5 @@
 import { DataErrorState } from '@/shared/components/data-error-state';
+import { Page } from '@/shared/components/page';
 import { carListSchema, type Car } from '@/shared/schemas/car.schema';
 import type { UserDetails } from '@/shared/types/auth-types';
 import { formatCurrency } from '@/shared/utils/format-currency';
@@ -75,15 +76,10 @@ export const SalespersonDashboard = ({ user }: SalespersonDashboardProps) => {
   const firstName = user.name.split(' ')[0];
 
   return (
-    <div className='flex flex-col gap-6'>
-      <div>
-        <h1 className='text-2xl font-semibold tracking-tight text-foreground'>
-          Welcome back, {firstName}
-        </h1>
-        <p className='text-sm text-muted-foreground'>
-          Your sales performance at a glance.
-        </p>
-      </div>
+    <Page
+      title={`Welcome back, ${firstName}`}
+      description='Your sales performance at a glance.'
+    >
 
       <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
         <MetricCard
@@ -150,6 +146,6 @@ export const SalespersonDashboard = ({ user }: SalespersonDashboardProps) => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

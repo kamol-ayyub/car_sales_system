@@ -1,4 +1,5 @@
 import { DataErrorState } from '@/shared/components/data-error-state';
+import { Page } from '@/shared/components/page';
 import { carListSchema, type Car } from '@/shared/schemas/car.schema';
 import { formatCurrency } from '@/shared/utils/format-currency';
 import { useGetAllQuery } from '@repo/api';
@@ -71,20 +72,15 @@ export const OwnerDashboard = () => {
   const topBrandCount = brandCounts[0]?.count ?? 1;
 
   return (
-    <div className='flex flex-col gap-6'>
-      <div className='flex flex-wrap items-center justify-between gap-3'>
-        <div>
-          <h1 className='text-2xl font-semibold tracking-tight text-foreground'>
-            Owner dashboard
-          </h1>
-          <p className='text-sm text-muted-foreground'>
-            Business overview across inventory and sales.
-          </p>
-        </div>
+    <Page
+      title='Owner dashboard'
+      description='Business overview across inventory and sales.'
+      actions={
         <Button variant='outline' render={<Link to='/inventory' />}>
           View inventory
         </Button>
-      </div>
+      }
+    >
 
       <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
         <MetricCard
@@ -153,6 +149,6 @@ export const OwnerDashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

@@ -2,19 +2,13 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  lazyRouteComponent,
   Outlet,
   redirect,
 } from '@tanstack/react-router';
 import {
-  CustomersPage,
-  HomePage,
-  InventoryPage,
   LoginPage,
   NotFoundPage,
-  ReportsPage,
-  SalesPage,
-  SalespeoplePage,
-  SettingsPage,
   UnauthorizedPage,
 } from '@/app/pages';
 import { queryClient, validateResponse } from '@repo/api';
@@ -24,6 +18,35 @@ import { AppLayout } from '@/shared/layout/app-layout';
 import { RouteErrorFallback } from '@/shared/layout/components';
 import { UserRole, type UserDetails } from '@/shared/types/auth-types';
 import type { AxiosResponse } from 'axios';
+
+const HomePage = lazyRouteComponent(
+  () => import('@/app/pages/home/home.page'),
+  'HomePage',
+);
+const InventoryPage = lazyRouteComponent(
+  () => import('@/app/pages/inventory/inventory.page'),
+  'InventoryPage',
+);
+const SalesPage = lazyRouteComponent(
+  () => import('@/app/pages/sales/sales.page'),
+  'SalesPage',
+);
+const CustomersPage = lazyRouteComponent(
+  () => import('@/app/pages/customers/customers.page'),
+  'CustomersPage',
+);
+const SettingsPage = lazyRouteComponent(
+  () => import('@/app/pages/settings/settings.page'),
+  'SettingsPage',
+);
+const SalespeoplePage = lazyRouteComponent(
+  () => import('@/app/pages/salespeople/salespeople.page'),
+  'SalespeoplePage',
+);
+const ReportsPage = lazyRouteComponent(
+  () => import('@/app/pages/reports/reports.page'),
+  'ReportsPage',
+);
 
 async function requireRole(role: UserRole | UserRole[]) {
   let userDetails: UserDetails;
@@ -135,19 +158,19 @@ export const homeRoute = createRoute({
 });
 
 export const inventoryRoute = createRoute({
-  getParentRoute: () => authenticatedGuard,
+  getParentRoute: () => salesPersonGuard,
   path: '/inventory',
   component: InventoryPage,
 });
 
 export const salesRoute = createRoute({
-  getParentRoute: () => authenticatedGuard,
+  getParentRoute: () => salesPersonGuard,
   path: '/sales',
   component: SalesPage,
 });
 
 export const customersRoute = createRoute({
-  getParentRoute: () => authenticatedGuard,
+  getParentRoute: () => salesPersonGuard,
   path: '/customers',
   component: CustomersPage,
 });
@@ -180,15 +203,13 @@ const routeTree = rootRoute.addChildren([
   layoutRoute.addChildren([
     indexRoute,
     unauthorizedRoute,
-    authenticatedGuard.addChildren([
-      homeRoute,
+    authenticatedGuard.addChildren([homeRoute, settingsRoute]),
+    salesPersonGuard.addChildren([
       inventoryRoute,
       salesRoute,
       customersRoute,
-      settingsRoute,
     ]),
     ownerGuard.addChildren([salespeopleRoute, reportsRoute]),
-    salesPersonGuard.addChildren([]),
     clientGuard.addChildren([]),
   ]),
   loginRoute,
