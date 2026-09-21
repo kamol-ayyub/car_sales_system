@@ -63,4 +63,10 @@ export class CarController {
   ) {
     return this.carService.sell(id, salesPersonId, sellCarDto);
   }
+
+  @Post(':id/unsell')
+  @Roles(UserRole.SALES_PERSON, UserRole.OWNER)
+  unsell(@Param() { id }: FindOneParams) {
+    return this.carService.unsell(id);
+  }
 }

@@ -1,3 +1,5 @@
+import type { Car } from '@/shared/schemas/car.schema';
+import { formatCurrency } from '@/shared/utils/format-currency';
 import { CarStatus } from '@repo/api/car-status';
 import { Badge } from '@repo/ui/components/badge';
 import { Button } from '@repo/ui/components/button';
@@ -23,14 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from '@repo/ui/components/table';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { CheckIcon } from 'lucide-react';
-import type { Car } from '@/shared/schemas/car.schema';
-import { formatCurrency } from '@/shared/utils/format-currency';
-
-const carStatusLabels: Record<CarStatus, string> = {
-  [CarStatus.AVAILABLE]: 'Available',
-  [CarStatus.SOLD]: 'Sold',
-};
+import { carStatusLabels } from '../car-status-labels';
 
 interface InventoryTableProps {
   cars: Car[];
@@ -45,6 +42,10 @@ export const InventoryTable = ({
   filterLabel,
   onClearFilter,
 }: InventoryTableProps) => {
+  const navigate = useNavigate();
+
+  const tableHeadOrder = ['Car', 'VIN', 'Year', 'Price', 'Status'];
+
   return (
     <Card>
       <CardHeader>
@@ -85,18 +86,32 @@ export const InventoryTable = ({
             <TableCaption className='sr-only'>Inventory of cars</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead>Car</TableHead>
-                <TableHead>VIN</TableHead>
-                <TableHead>Year</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Status</TableHead>
+                {tableHeadOrder.map((item) => (
+                  <TableHead key={item}>{item}</TableHead>
+                ))}
               </TableRow>
             </TableHeader>
             <TableBody>
               {cars.map((car) => (
-                <TableRow key={car.id}>
+                <TableRow
+                  key={car.id}
+                  className='relative cursor-pointer'
+                  onClick={() =>
+                    navigate({
+                      to: '/inventory/$carId',
+                      params: { carId: car.id },
+                    })
+                  }
+                >
                   <TableCell className='font-medium'>
-                    {car.brand} {car.model}
+                    <Link
+                      to='/inventory/$carId'
+                      params={{ carId: car.id }}
+                      onClick={(event) => event.stopPropagation()}
+                      className="rounded-sm after:absolute after:inset-0 after:content-[''] hover:underline focus-visible:underline focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring/50"
+                    >
+                      {car.brand} {car.model}
+                    </Link>
                   </TableCell>
                   <TableCell className='text-muted-foreground'>
                     {car.vin}

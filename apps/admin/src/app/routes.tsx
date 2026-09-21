@@ -11,7 +11,8 @@ import {
   NotFoundPage,
   UnauthorizedPage,
 } from '@/app/pages';
-import { queryClient, validateResponse } from '@repo/api';
+import { queryClient, validateResponse, z } from '@repo/api';
+import { CarStatus } from '@repo/api/car-status';
 import { axiosInstance } from '@/config/axios-config';
 import { meResponseSchema } from '@/shared/schemas/auth.schema';
 import { AppLayout } from '@/shared/layout/app-layout';
@@ -26,6 +27,10 @@ const HomePage = lazyRouteComponent(
 const InventoryPage = lazyRouteComponent(
   () => import('@/app/pages/inventory/inventory.page'),
   'InventoryPage',
+);
+const CarDetailsPage = lazyRouteComponent(
+  () => import('@/app/pages/car-details/car-details.page'),
+  'CarDetailsPage',
 );
 const SalesPage = lazyRouteComponent(
   () => import('@/app/pages/sales/sales.page'),
@@ -157,10 +162,21 @@ export const homeRoute = createRoute({
   component: HomePage,
 });
 
+const inventorySearchSchema = z.object({
+  status: z.enum(['all', CarStatus.AVAILABLE, CarStatus.SOLD]).optional(),
+});
+
 export const inventoryRoute = createRoute({
   getParentRoute: () => salesPersonGuard,
   path: '/inventory',
+  validateSearch: (search) => inventorySearchSchema.parse(search),
   component: InventoryPage,
+});
+
+export const carDetailsRoute = createRoute({
+  getParentRoute: () => salesPersonGuard,
+  path: '/inventory/$carId',
+  component: CarDetailsPage,
 });
 
 export const salesRoute = createRoute({
@@ -206,6 +222,7 @@ const routeTree = rootRoute.addChildren([
     authenticatedGuard.addChildren([homeRoute, settingsRoute]),
     salesPersonGuard.addChildren([
       inventoryRoute,
+      carDetailsRoute,
       salesRoute,
       customersRoute,
     ]),

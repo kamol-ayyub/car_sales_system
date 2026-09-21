@@ -179,7 +179,7 @@ describe('UserService', () => {
       expect(mockQueryBuilder.take).toHaveBeenCalledWith(10);
     });
 
-    it('should escape LIKE wildcards and apply search filter on name and email', async () => {
+    it('should escape LIKE wildcards and apply search filter on name, email and phone', async () => {
       mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
 
       await service.findAll({
@@ -190,7 +190,7 @@ describe('UserService', () => {
       });
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        '(user.name ILIKE :search OR user.email ILIKE :search)',
+        '(user.name ILIKE :search OR user.email ILIKE :search OR user.phone ILIKE :search)',
         { search: '%john\\%doe\\_test\\\\%' },
       );
     });

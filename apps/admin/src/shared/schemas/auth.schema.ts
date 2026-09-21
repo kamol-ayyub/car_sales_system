@@ -18,7 +18,7 @@ export const meResponseSchema = z
   .object({
     id: z.string(),
     name: z.string(),
-    email: z.string(),
+    email: z.string().nullable(),
     phone: z.string().nullable().optional(),
     roles: z.array(userRoleSchema),
     createdAt: z.string().optional(),

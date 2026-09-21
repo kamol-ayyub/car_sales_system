@@ -26,7 +26,7 @@ export class CarService {
     createCarDto: CreateCarDto,
     salesPersonId: string,
   ): Promise<Car> {
-    const salesPerson = await this.getSalesPerson(salesPersonId);
+    const salesPerson = await this.getSeller(salesPersonId);
 
     const car = this.carRepository.create({
       ...createCarDto,
@@ -72,6 +72,28 @@ export class CarService {
     }
   }
 
+  async unsell(id: string): Promise<Car> {
+    const car = await this.carRepository.findOne({
+      where: { id },
+      relations: { salesPerson: true, client: true },
+    });
+
+    if (!car) {
+      throw new NotFoundException(`Car with id ${id} not found`);
+    }
+
+    if (car.status !== CarStatus.SOLD) {
+      throw new BadRequestException(`Car with id ${id} is not sold`);
+    }
+
+    car.status = CarStatus.AVAILABLE;
+    car.client = null;
+    car.salePrice = null;
+    car.soldAt = null;
+
+    return this.carRepository.save(car);
+  }
+
   async sell(
     carId: string,
     salesPersonId: string,
@@ -91,7 +113,7 @@ export class CarService {
     }
 
     const client = await this.getClient(sellCarDto.clientId);
-    const salesPerson = await this.getSalesPerson(salesPersonId);
+    const salesPerson = await this.getSeller(salesPersonId);
 
     car.status = CarStatus.SOLD;
     car.client = client;
@@ -119,21 +141,23 @@ export class CarService {
     return user;
   }
 
-  private async getSalesPerson(userId: string): Promise<User> {
-    const user = await this.userRepository.findOneBy({
-      id: userId,
-      roles: ArrayContains([UserRole.SALES_PERSON]),
-    });
+  private async getSeller(userId: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+
     if (!user) {
-      throw new NotFoundException(
-        `Sales person with id ${userId} does not exist`,
-      );
+      throw new NotFoundException(`Seller with id ${userId} does not exist`);
     }
-    if (!user.roles.includes(UserRole.SALES_PERSON)) {
+
+    const canSell =
+      user.roles.includes(UserRole.SALES_PERSON) ||
+      user.roles.includes(UserRole.OWNER);
+
+    if (!canSell) {
       throw new BadRequestException(
-        `User with id ${userId} is not a sales person`,
+        `User with id ${userId} cannot record sales`,
       );
     }
+
     return user;
   }
 }

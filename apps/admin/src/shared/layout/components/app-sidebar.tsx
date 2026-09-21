@@ -51,7 +51,10 @@ export const AppSidebar = ({ user }: AppSidebarProps) => {
                 <SidebarMenuItem key={item.to}>
                   <SidebarMenuButton
                     render={<Link to={item.to} />}
-                    isActive={pathname === item.to}
+                    isActive={
+                      pathname === item.to ||
+                      pathname.startsWith(`${item.to}/`)
+                    }
                     tooltip={item.label}
                   >
                     <item.icon />

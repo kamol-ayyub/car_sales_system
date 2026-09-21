@@ -5,7 +5,8 @@ const carPartySchema = z
   .object({
     id: z.string(),
     name: z.string(),
-    email: z.string(),
+    email: z.string().nullable(),
+    phone: z.string().nullable().optional(),
   })
   .loose();
 

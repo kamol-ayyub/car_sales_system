@@ -9,7 +9,7 @@ export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 export interface UserDetails {
   id: string;
   name: string;
-  email: string;
+  email: string | null;
   phone?: string | null;
   roles: UserRole[];
   createdAt?: string;

@@ -15,6 +15,7 @@ import {
 import { Roles } from './decorators/roles.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
+import { CreateClientDto } from './dto/create-client.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -42,6 +43,18 @@ export class UserController {
   @Roles(UserRole.OWNER)
   findAll(@Query() query: ListUsersQueryDto) {
     return this.userService.findAll(query);
+  }
+
+  @Get('clients')
+  @Roles(UserRole.SALES_PERSON, UserRole.OWNER)
+  findClients(@Query() query: ListUsersQueryDto) {
+    return this.userService.findAll({ ...query, role: UserRole.CLIENT });
+  }
+
+  @Post('clients')
+  @Roles(UserRole.SALES_PERSON, UserRole.OWNER)
+  createClient(@Body() createClientDto: CreateClientDto) {
+    return this.userService.createClient(createClientDto);
   }
 
   @Get(':id')

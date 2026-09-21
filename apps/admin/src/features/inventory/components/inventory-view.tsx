@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { carListSchema, type Car } from '@/shared/schemas/car.schema';
 import { useGetAllQuery } from '@repo/api';
 import { Skeleton } from '@repo/ui/components/skeleton';
@@ -11,13 +10,20 @@ import {
 import { CarStatusFilter } from './car-status-filter';
 import { InventoryTable } from './inventory-table';
 
-export const InventoryView = () => {
+interface InventoryViewProps {
+  statusFilter: CarStatusFilterValue;
+  onStatusFilterChange: (value: CarStatusFilterValue) => void;
+}
+
+export const InventoryView = ({
+  statusFilter,
+  onStatusFilterChange,
+}: InventoryViewProps) => {
   const { data, isPending, isError, refetch } = useGetAllQuery<Car[]>({
     key: 'cars',
     url: '/car',
     schema: carListSchema,
   });
-  const [statusFilter, setStatusFilter] = useState<CarStatusFilterValue>('all');
 
   const cars = data?.data ?? [];
   const isFiltered = statusFilter !== 'all';
@@ -42,7 +48,9 @@ export const InventoryView = () => {
           </p>
         )
       }
-      actions={<CarStatusFilter value={statusFilter} onChange={setStatusFilter} />}
+      actions={
+        <CarStatusFilter value={statusFilter} onChange={onStatusFilterChange} />
+      }
     >
       {isPending ? (
         <Skeleton className='h-64 w-full rounded-xl' />
@@ -53,7 +61,7 @@ export const InventoryView = () => {
           cars={filteredCars}
           isFiltered={isFiltered}
           filterLabel={filterLabel}
-          onClearFilter={() => setStatusFilter('all')}
+          onClearFilter={() => onStatusFilterChange('all')}
         />
       )}
     </Page>

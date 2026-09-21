@@ -16,7 +16,7 @@ export type TokenType = 'access' | 'refresh';
 
 export interface TokenPayload {
   sub: string;
-  email: string;
+  email: string | null;
   roles: UserRole[];
   typ: TokenType;
   tokenVersion: number;

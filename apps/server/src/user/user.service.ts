@@ -5,8 +5,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { type Paginated } from '@repo/api/pagination';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
+import { CreateClientDto } from './dto/create-client.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserRole } from './entities/user.entity';
@@ -36,6 +37,30 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
+  async createClient(createClientDto: CreateClientDto): Promise<User> {
+    const email = createClientDto.email?.trim() || null;
+
+    if (email) {
+      const escapedEmail = email.replace(/[%_\\]/g, '\\$&');
+      const isEmailTaken = await this.userRepository.findOne({
+        where: { email: ILike(escapedEmail) },
+      });
+      if (isEmailTaken) {
+        throw new ConflictException('A client with this email already exists');
+      }
+    }
+
+    const client = this.userRepository.create({
+      name: createClientDto.name,
+      phone: createClientDto.phone,
+      email,
+      passwordHash: null,
+      roles: [UserRole.CLIENT],
+    });
+
+    return this.userRepository.save(client);
+  }
+
   async findAll(query: ListUsersQueryDto): Promise<Paginated<User>> {
     const { role, search, page, limit, sortOrder } = query;
 
@@ -51,9 +76,12 @@ export class UserService {
 
     if (search) {
       const escapedSearch = search.replace(/[%_\\]/g, '\\$&');
-      qb.andWhere('(user.name ILIKE :search OR user.email ILIKE :search)', {
-        search: `%${escapedSearch}%`,
-      });
+      qb.andWhere(
+        '(user.name ILIKE :search OR user.email ILIKE :search OR user.phone ILIKE :search)',
+        {
+          search: `%${escapedSearch}%`,
+        },
+      );
     }
 
     qb.orderBy('user.created_at', sortOrder)
