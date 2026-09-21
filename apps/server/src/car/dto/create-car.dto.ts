@@ -10,7 +10,6 @@ export const createCarSchema = z.object({
   vin: z.string().length(17),
   status: carStatusSchema.optional(),
   images: z.array(z.url()).max(8).optional(),
-  salesPersonId: z.uuid().optional(),
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
 });

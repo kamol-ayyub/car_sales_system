@@ -6,11 +6,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { CarStatus } from '@repo/api/car-status';
+import { ArrayContains, Repository } from 'typeorm';
 import { CreateCarDto } from './dto/create-car.dto';
 import { SellCarDto } from './dto/sell-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
-import { CarStatus } from '@repo/api/car-status';
 import { Car } from './entities/car.entity';
 
 @Injectable()
@@ -22,10 +22,11 @@ export class CarService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async create(createCarDto: CreateCarDto): Promise<Car> {
-    const salesPerson = createCarDto.salesPersonId
-      ? await this.getSalesPerson(createCarDto.salesPersonId)
-      : null;
+  async create(
+    createCarDto: CreateCarDto,
+    salesPersonId: string,
+  ): Promise<Car> {
+    const salesPerson = await this.getSalesPerson(salesPersonId);
 
     const car = this.carRepository.create({
       ...createCarDto,
@@ -61,9 +62,6 @@ export class CarService {
       throw new NotFoundException(`Car with id ${id} not found`);
     }
 
-    if (updateCarDto.salesPersonId) {
-      car.salesPerson = await this.getSalesPerson(updateCarDto.salesPersonId);
-    }
     return this.carRepository.save(car);
   }
 
@@ -107,7 +105,7 @@ export class CarService {
   private async getClient(userId: string): Promise<User> {
     const user = await this.userRepository.findOneBy({
       id: userId,
-      roles: UserRole.CLIENT,
+      roles: ArrayContains([UserRole.CLIENT]),
     });
 
     if (!user) {
@@ -124,7 +122,7 @@ export class CarService {
   private async getSalesPerson(userId: string): Promise<User> {
     const user = await this.userRepository.findOneBy({
       id: userId,
-      roles: UserRole.SALES_PERSON,
+      roles: ArrayContains([UserRole.SALES_PERSON]),
     });
     if (!user) {
       throw new NotFoundException(

@@ -1,21 +1,21 @@
+import { FindOneParams } from '@/common/dto/find-one.params';
+import { CurrentUserId } from '@/user/decorators/current-user-id.decorator';
+import { Public } from '@/user/decorators/public.decorator';
+import { Roles } from '@/user/decorators/roles.decorator';
+import { UserRole } from '@/user/entities/user.entity';
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
 import { CarService } from './car.service';
 import { CreateCarDto } from './dto/create-car.dto';
-import { UpdateCarDto } from './dto/update-car.dto';
 import { SellCarDto } from './dto/sell-car.dto';
-import { Public } from '@/user/decorators/public.decorator';
-import { Roles } from '@/user/decorators/roles.decorator';
-import { CurrentUserId } from '@/user/decorators/current-user-id.decorator';
-import { UserRole } from '@/user/entities/user.entity';
-import { FindOneParams } from '@/common/dto/find-one.params';
+import { UpdateCarDto } from './dto/update-car.dto';
 
 @Controller('car')
 export class CarController {
@@ -23,8 +23,11 @@ export class CarController {
 
   @Post()
   @Roles(UserRole.SALES_PERSON, UserRole.OWNER)
-  create(@Body() createCarDto: CreateCarDto) {
-    return this.carService.create(createCarDto);
+  create(
+    @Body() createCarDto: CreateCarDto,
+    @CurrentUserId() salesPersonId: string,
+  ) {
+    return this.carService.create(createCarDto, salesPersonId);
   }
 
   @Public()
