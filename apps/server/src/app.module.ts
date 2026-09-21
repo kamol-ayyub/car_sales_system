@@ -1,4 +1,3 @@
-import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
 import { CarModule } from '@/car/car.module';
 import { Car } from '@/car/entities/car.entity';
@@ -44,7 +43,7 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
     UserModule,
   ],
 
-  controllers: [AppController],
+  controllers: [],
   providers: [
     AppService,
     {

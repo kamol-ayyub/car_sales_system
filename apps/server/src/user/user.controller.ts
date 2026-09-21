@@ -10,10 +10,12 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { Roles } from './decorators/roles.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
+import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserRole } from './entities/user.entity';
@@ -38,8 +40,8 @@ export class UserController {
 
   @Get()
   @Roles(UserRole.OWNER)
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Query() query: ListUsersQueryDto) {
+    return this.userService.findAll(query);
   }
 
   @Get(':id')

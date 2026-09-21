@@ -4,9 +4,21 @@
   "testEnvironment": "node",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
+    "^.+\\.(t|j)s$": [
+      "ts-jest",
+      {
+        "tsconfig": {
+          "module": "commonjs",
+          "moduleResolution": "node",
+          "resolvePackageJsonExports": false
+        }
+      }
+    ]
   },
   "moduleNameMapper": {
-    "^@/(.*)$": "<rootDir>/../src/$1"
+    "^@/(.*)$": "<rootDir>/../src/$1",
+    "^@repo/api/car-status$": "<rootDir>/../../../packages/api/src/car-status.ts",
+    "^@repo/api/login-response$": "<rootDir>/../../../packages/api/src/login-response.ts",
+    "^@repo/api/pagination$": "<rootDir>/../../../packages/api/src/pagination.ts"
   }
 }

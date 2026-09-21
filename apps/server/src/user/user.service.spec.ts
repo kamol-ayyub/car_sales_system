@@ -22,6 +22,7 @@ describe('UserService', () => {
   beforeEach(async () => {
     userRepository = {
       findOneBy: jest.fn(),
+      findAndCount: jest.fn(),
       create: jest.fn(),
       save: jest.fn(),
     };
@@ -59,7 +60,7 @@ describe('UserService', () => {
         ...createUserDto,
         passwordHash: 'hashedPassword',
         tokenVersion: 0,
-      } as User;
+      } as unknown as User;
       (userRepository.create as jest.Mock).mockReturnValue(createdUser);
       (userRepository.save as jest.Mock).mockResolvedValue(createdUser);
 
@@ -86,26 +87,129 @@ describe('UserService', () => {
   });
 
   describe('findAll', () => {
-    it('should query users excluding owner role', async () => {
-      const mockQueryBuilder = {
+    let mockQueryBuilder: {
+      where: jest.Mock;
+      andWhere: jest.Mock;
+      orderBy: jest.Mock;
+      addOrderBy: jest.Mock;
+      skip: jest.Mock;
+      take: jest.Mock;
+      getManyAndCount: jest.Mock;
+    };
+
+    beforeEach(() => {
+      mockQueryBuilder = {
         where: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([
-          { id: 'u1', roles: [UserRole.CLIENT] },
-          { id: 'u2', roles: [UserRole.SALES_PERSON] },
-        ]),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn(),
       };
       userRepository.createQueryBuilder = jest
         .fn()
         .mockReturnValue(mockQueryBuilder);
+    });
 
-      const result = await service.findAll();
+    it('should return paginated users excluding owners by default', async () => {
+      const users = [
+        { id: 'u1', roles: [UserRole.CLIENT] },
+        { id: 'u2', roles: [UserRole.SALES_PERSON] },
+      ] as User[];
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([users, 2]);
+
+      const result = await service.findAll({
+        page: 1,
+        limit: 20,
+        sortOrder: 'DESC',
+      });
 
       expect(userRepository.createQueryBuilder).toHaveBeenCalledWith('user');
       expect(mockQueryBuilder.where).toHaveBeenCalledWith(
         'NOT (:ownerRole = ANY(user.roles))',
         { ownerRole: UserRole.OWNER },
       );
-      expect(result).toHaveLength(2);
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'user.created_at',
+        'DESC',
+      );
+      expect(mockQueryBuilder.addOrderBy).toHaveBeenCalledWith(
+        'user.created_at',
+        'ASC',
+      );
+      expect(mockQueryBuilder.skip).toHaveBeenCalledWith(0);
+      expect(mockQueryBuilder.take).toHaveBeenCalledWith(20);
+      expect(result.data).toHaveLength(2);
+      expect(result.meta).toEqual({
+        total: 2,
+        page: 1,
+        limit: 20,
+        totalPages: 1,
+      });
+    });
+
+    it('should apply role filter and pagination when provided', async () => {
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+
+      await service.findAll({
+        role: UserRole.SALES_PERSON,
+        page: 3,
+        limit: 10,
+        sortOrder: 'ASC',
+      });
+
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'NOT (:ownerRole = ANY(user.roles))',
+        { ownerRole: UserRole.OWNER },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        ':role = ANY(user.roles)',
+        { role: UserRole.SALES_PERSON },
+      );
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'user.created_at',
+        'ASC',
+      );
+      expect(mockQueryBuilder.addOrderBy).toHaveBeenCalledWith(
+        'user.created_at',
+        'ASC',
+      );
+      expect(mockQueryBuilder.skip).toHaveBeenCalledWith(20);
+      expect(mockQueryBuilder.take).toHaveBeenCalledWith(10);
+    });
+
+    it('should escape LIKE wildcards and apply search filter on name and email', async () => {
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+
+      await service.findAll({
+        search: 'john%doe_test\\',
+        page: 1,
+        limit: 20,
+        sortOrder: 'DESC',
+      });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        '(user.name ILIKE :search OR user.email ILIKE :search)',
+        { search: '%john\\%doe\\_test\\\\%' },
+      );
+    });
+
+    it('should return totalPages 0 when total is 0', async () => {
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+
+      const result = await service.findAll({
+        page: 1,
+        limit: 20,
+        sortOrder: 'DESC',
+      });
+
+      expect(result.meta).toEqual({
+        total: 0,
+        page: 1,
+        limit: 20,
+        totalPages: 0,
+      });
     });
   });
 

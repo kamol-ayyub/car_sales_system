@@ -8,7 +8,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./car-status": "./src/car-status.ts",
-    "./login-response": "./src/login-response.ts"
+    "./login-response": "./src/login-response.ts",
+    "./pagination": "./src/pagination.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.21",
