@@ -38,7 +38,7 @@ export class UserService {
   }
 
   async createClient(createClientDto: CreateClientDto): Promise<User> {
-    const email = createClientDto.email?.trim() || null;
+    const email = createClientDto.email || null;
 
     if (email) {
       const escapedEmail = email.replace(/[%_\\]/g, '\\$&');
