@@ -1,3 +1,4 @@
+import { formatShortDate } from '@repo/utils';
 import type { Car } from '@/shared/schemas/car.schema';
 import { formatCurrency } from '@/shared/utils/format-currency';
 import {
@@ -16,16 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from '@repo/ui/components/table';
-
-const soldDateFormatter = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-});
-
-const formatSoldDate = (value: string): string => {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '—' : soldDateFormatter.format(date);
-};
 
 interface RecentSalesTableProps {
   cars: Car[];
@@ -71,7 +62,7 @@ export const RecentSalesTable = ({
                   <TableCell>{car.client?.name ?? '—'}</TableCell>
                   <TableCell>{car.salesPerson?.name ?? '—'}</TableCell>
                   <TableCell className='text-muted-foreground'>
-                    {car.soldAt ? formatSoldDate(car.soldAt) : '—'}
+                    {car.soldAt ? formatShortDate(car.soldAt) : '—'}
                   </TableCell>
                   <TableCell className='text-right tabular-nums'>
                     {formatCurrency(car.salePrice ?? car.price)}

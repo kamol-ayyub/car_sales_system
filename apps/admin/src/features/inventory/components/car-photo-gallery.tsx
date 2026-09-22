@@ -11,14 +11,11 @@ export const CarPhotoGallery = ({ images, label }: CarPhotoGalleryProps) => {
 
   if (images.length === 0) {
     return (
-      <div
-        role='img'
-        aria-label={`No photos available for ${label}`}
-        className='flex aspect-[4/3] w-full items-center justify-center rounded-xl border border-dashed bg-muted/40'
-      >
+      <div className='flex aspect-[4/3] w-full items-center justify-center rounded-xl border border-dashed bg-muted/40'>
         <CarIcon
+          role='img'
+          aria-label={`No photos available for ${label}`}
           className='size-12 text-muted-foreground'
-          aria-hidden='true'
         />
       </div>
     );

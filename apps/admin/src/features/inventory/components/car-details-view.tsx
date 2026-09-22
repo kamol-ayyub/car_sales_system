@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { useGetAllQuery, usePostQuery } from '@repo/api';
 import { CarStatus } from '@repo/api/car-status';
+import { formatDateTime } from '@repo/utils';
 import { Badge } from '@repo/ui/components/badge';
 import { Button } from '@repo/ui/components/button';
 import {
@@ -24,19 +25,6 @@ import { RecordSaleDialog } from './record-sale-dialog';
 const carStatusDescriptions: Record<CarStatus, string> = {
   [CarStatus.AVAILABLE]: 'This car is in stock and available for sale.',
   [CarStatus.SOLD]: 'This car has been sold to a buyer.',
-};
-
-const dateTimeFormatter = new Intl.DateTimeFormat('en-US', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-});
-
-const formatDateTime = (value?: string | null): string => {
-  if (!value) {
-    return '—';
-  }
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '—' : dateTimeFormatter.format(date);
 };
 
 const contactLinkClassName =
