@@ -85,8 +85,10 @@ export const InventoryView = ({
           </p>
         )
       }
-      actions={
-        <>
+      actions={<CreateCarDialog />}
+    >
+      <div className='flex flex-col gap-3'>
+        <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
           <TableSearch
             value={searchInput}
             onChange={handleSearchChange}
@@ -94,26 +96,24 @@ export const InventoryView = ({
             label='Search inventory'
           />
           <CarStatusFilter value={statusFilter} onChange={handleStatusChange} />
-          <CreateCarDialog />
-        </>
-      }
-    >
-      {isPending ? (
-        <InventoryTableSkeleton rows={pageSize} />
-      ) : isError ? (
-        <DataErrorState onRetry={refetch} />
-      ) : (
-        <InventoryTable
-          cars={cars}
-          meta={meta}
-          isFiltered={isFiltered}
-          filterLabel={filterLabel}
-          searchQuery={activeSearch}
-          onClearFilter={handleClearFilters}
-          onPageChange={setPage}
-          onPageSizeChange={handlePageSizeChange}
-        />
-      )}
+        </div>
+        {isPending ? (
+          <InventoryTableSkeleton rows={pageSize} />
+        ) : isError ? (
+          <DataErrorState onRetry={refetch} />
+        ) : (
+          <InventoryTable
+            cars={cars}
+            meta={meta}
+            isFiltered={isFiltered}
+            filterLabel={filterLabel}
+            searchQuery={activeSearch}
+            onClearFilter={handleClearFilters}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        )}
+      </div>
     </Page>
   );
 };

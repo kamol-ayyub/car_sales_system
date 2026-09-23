@@ -48,6 +48,10 @@ const SalespeoplePage = lazyRouteComponent(
   () => import('@/app/pages/salespeople/salespeople.page'),
   'SalespeoplePage',
 );
+const SalespersonDetailsPage = lazyRouteComponent(
+  () => import('@/app/pages/salesperson-details/salesperson-details.page'),
+  'SalespersonDetailsPage',
+);
 const ReportsPage = lazyRouteComponent(
   () => import('@/app/pages/reports/reports.page'),
   'ReportsPage',
@@ -191,6 +195,12 @@ export const salespeopleRoute = createRoute({
   component: SalespeoplePage,
 });
 
+export const salespersonDetailsRoute = createRoute({
+  getParentRoute: () => ownerGuard,
+  path: '/salespeople/$salesPersonId',
+  component: SalespersonDetailsPage,
+});
+
 export const reportsRoute = createRoute({
   getParentRoute: () => ownerGuard,
   path: '/reports',
@@ -214,7 +224,11 @@ const routeTree = rootRoute.addChildren([
       salesRoute,
       customersRoute,
     ]),
-    ownerGuard.addChildren([salespeopleRoute, reportsRoute]),
+    ownerGuard.addChildren([
+      salespeopleRoute,
+      salespersonDetailsRoute,
+      reportsRoute,
+    ]),
   ]),
   loginRoute,
 ]);

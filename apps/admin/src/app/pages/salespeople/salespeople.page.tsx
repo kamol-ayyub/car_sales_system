@@ -1,5 +1,5 @@
-import { Page } from '@/shared/components/page';
+import { SalespeopleView } from '@/features/salespeople';
 
 export const SalespeoplePage = () => {
-  return <Page title='Salespeople' />;
+  return <SalespeopleView />;
 };

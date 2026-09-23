@@ -48,6 +48,12 @@ export class CarService {
       qb.andWhere('car.status = :status', { status: query.status });
     }
 
+    if (query.salesPersonId) {
+      qb.andWhere('salesPerson.id = :salesPersonId', {
+        salesPersonId: query.salesPersonId,
+      });
+    }
+
     return paginate(qb, query, { searchColumns: ['brand', 'model', 'vin'] });
   }
 
