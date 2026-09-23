@@ -8,6 +8,7 @@ import {
   type CarStatusFilterValue,
 } from '../car-status-filter-options';
 import { CarStatusFilter } from './car-status-filter';
+import { CreateCarDialog } from './create-car-dialog';
 import { InventoryTable } from './inventory-table';
 
 interface InventoryViewProps {
@@ -49,7 +50,13 @@ export const InventoryView = ({
         )
       }
       actions={
-        <CarStatusFilter value={statusFilter} onChange={onStatusFilterChange} />
+        <>
+          <CarStatusFilter
+            value={statusFilter}
+            onChange={onStatusFilterChange}
+          />
+          <CreateCarDialog />
+        </>
       }
     >
       {isPending ? (

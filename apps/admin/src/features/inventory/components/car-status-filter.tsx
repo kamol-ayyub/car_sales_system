@@ -18,6 +18,7 @@ export const CarStatusFilter = ({ value, onChange }: CarStatusFilterProps) => {
         onChange((next[0] as CarStatusFilterValue) ?? 'all');
       }}
       variant='outline'
+      spacing={0}
     >
       {carStatusFilterOptions.map((option) => (
         <ToggleGroupItem key={option.value} value={option.value}>
