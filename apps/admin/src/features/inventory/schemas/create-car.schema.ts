@@ -58,11 +58,11 @@ export const createCarFormSchema = z.object({
 
 export type CreateCarFormValues = z.infer<typeof createCarFormSchema>;
 
-export type CreateCarBody = {
-  brand: string;
-  model: string;
+export type CreateCarBody = Omit<
+  CreateCarFormValues,
+  'year' | 'price' | 'images'
+> & {
   year: number;
   price: number;
-  vin: string;
   images?: string[];
 };

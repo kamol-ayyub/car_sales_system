@@ -56,16 +56,13 @@ interface RecordSaleDialogProps {
   onUndo: () => void;
 }
 
-interface SellCarBody {
-  clientId: string;
+type SellCarBody = Omit<SellCarFormValues, 'salePrice'> & {
   salePrice?: number;
-}
+};
 
-interface CreateClientBody {
-  name: string;
-  phone: string;
+type CreateClientBody = Omit<CreateClientFormValues, 'email'> & {
   email?: string;
-}
+};
 
 interface ClientOption {
   value: string;

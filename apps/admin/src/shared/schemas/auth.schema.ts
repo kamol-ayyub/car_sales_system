@@ -1,4 +1,5 @@
 import { z } from '@repo/api';
+import { UserRole } from '@/shared/types/auth-types';
 
 /**
  * Auth response schemas.
@@ -12,7 +13,11 @@ export const accessTokenResponseSchema = z.object({
 export const signinResponseSchema = accessTokenResponseSchema;
 export const refreshResponseSchema = accessTokenResponseSchema;
 
-export const userRoleSchema = z.enum(['owner', 'sales_person', 'client']);
+export const userRoleSchema = z.enum([
+  UserRole.Owner,
+  UserRole.SalesPerson,
+  UserRole.Client,
+] as const);
 
 export const meResponseSchema = z
   .object({
