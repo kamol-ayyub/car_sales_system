@@ -88,6 +88,7 @@ describe('UserService', () => {
 
   describe('findAll', () => {
     let mockQueryBuilder: {
+      alias: string;
       where: jest.Mock;
       andWhere: jest.Mock;
       orderBy: jest.Mock;
@@ -99,6 +100,7 @@ describe('UserService', () => {
 
     beforeEach(() => {
       mockQueryBuilder = {
+        alias: 'user',
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
@@ -135,7 +137,7 @@ describe('UserService', () => {
         'DESC',
       );
       expect(mockQueryBuilder.addOrderBy).toHaveBeenCalledWith(
-        'user.created_at',
+        'user.id',
         'ASC',
       );
       expect(mockQueryBuilder.skip).toHaveBeenCalledWith(0);
@@ -172,7 +174,7 @@ describe('UserService', () => {
         'ASC',
       );
       expect(mockQueryBuilder.addOrderBy).toHaveBeenCalledWith(
-        'user.created_at',
+        'user.id',
         'ASC',
       );
       expect(mockQueryBuilder.skip).toHaveBeenCalledWith(20);

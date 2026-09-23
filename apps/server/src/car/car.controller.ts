@@ -11,9 +11,11 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { CarService } from './car.service';
 import { CreateCarDto } from './dto/create-car.dto';
+import { ListCarsQueryDto } from './dto/list-cars-query.dto';
 import { SellCarDto } from './dto/sell-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 
@@ -32,8 +34,8 @@ export class CarController {
 
   @Public()
   @Get()
-  findAll() {
-    return this.carService.findAll();
+  findAll(@Query() query: ListCarsQueryDto) {
+    return this.carService.findAll(query);
   }
 
   @Public()

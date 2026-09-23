@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { paginate } from '@/common/pagination/paginate';
 import { type Paginated } from '@repo/api/pagination';
 import { ILike, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -62,7 +63,7 @@ export class UserService {
   }
 
   async findAll(query: ListUsersQueryDto): Promise<Paginated<User>> {
-    const { role, search, page, limit, sortOrder } = query;
+    const { role } = query;
 
     const qb = this.userRepository
       .createQueryBuilder('user')
@@ -74,32 +75,9 @@ export class UserService {
       qb.andWhere(':role = ANY(user.roles)', { role });
     }
 
-    if (search) {
-      const escapedSearch = search.replace(/[%_\\]/g, '\\$&');
-      qb.andWhere(
-        '(user.name ILIKE :search OR user.email ILIKE :search OR user.phone ILIKE :search)',
-        {
-          search: `%${escapedSearch}%`,
-        },
-      );
-    }
-
-    qb.orderBy('user.created_at', sortOrder)
-      .addOrderBy('user.created_at', 'ASC')
-      .skip((page - 1) * limit)
-      .take(limit);
-
-    const [data, total] = await qb.getManyAndCount();
-
-    return {
-      data,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
+    return paginate(qb, query, {
+      searchColumns: ['name', 'email', 'phone'],
+    });
   }
 
   async findOne(id: string, field: keyof User = 'id'): Promise<User> {

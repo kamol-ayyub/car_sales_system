@@ -171,6 +171,8 @@ JWT authentication is used. The refresh token is stored in an httpOnly, Secure, 
 - State assumptions clearly
 - Propose alternatives when trade-offs exist
 - Prefer standard library and existing utilities over introducing new abstractions
+- Before declaring a type or interface, first look for an existing shared type (`packages/api`, `shared/types/`, `shared/schemas/`, or a Zod schema inferred with `z.infer`) and reuse it
+- Derive related types with TypeScript utility types (`Pick`, `Omit`, `Partial`, `Required`, `Record`, etc.) instead of re-declaring properties that already exist elsewhere
 - Use TanStack Query (react-query) for all server state and API calls
 - Every time you complete a task, run:
   - `pnpm lint`

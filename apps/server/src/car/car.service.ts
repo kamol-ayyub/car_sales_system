@@ -1,3 +1,4 @@
+import { paginate } from '@/common/pagination/paginate';
 import { User, UserRole } from '@/user/entities/user.entity';
 import {
   BadRequestException,
@@ -7,8 +8,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CarStatus } from '@repo/api/car-status';
+import { type Paginated } from '@repo/api/pagination';
 import { ArrayContains, Repository } from 'typeorm';
 import { CreateCarDto } from './dto/create-car.dto';
+import { ListCarsQueryDto } from './dto/list-cars-query.dto';
 import { SellCarDto } from './dto/sell-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { Car } from './entities/car.entity';
@@ -35,10 +38,17 @@ export class CarService {
     return this.carRepository.save(car);
   }
 
-  async findAll(): Promise<Car[]> {
-    return this.carRepository.find({
-      relations: { salesPerson: true, client: true },
-    });
+  async findAll(query: ListCarsQueryDto): Promise<Paginated<Car>> {
+    const qb = this.carRepository
+      .createQueryBuilder('car')
+      .leftJoinAndSelect('car.salesPerson', 'salesPerson')
+      .leftJoinAndSelect('car.client', 'client');
+
+    if (query.status) {
+      qb.andWhere('car.status = :status', { status: query.status });
+    }
+
+    return paginate(qb, query, { searchColumns: ['brand', 'model', 'vin'] });
   }
 
   async findOne(id: string): Promise<Car> {

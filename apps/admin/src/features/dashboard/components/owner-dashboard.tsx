@@ -1,6 +1,6 @@
 import { DataErrorState } from '@/shared/components/data-error-state';
 import { Page } from '@/shared/components/page';
-import { carListSchema, type Car } from '@/shared/schemas/car.schema';
+import { carListSchema, type PaginatedCars } from '@/shared/schemas/car.schema';
 import { formatCurrency } from '@/shared/utils/format-currency';
 import { useGetAllQuery } from '@repo/api';
 import { CarStatus } from '@repo/api/car-status';
@@ -28,9 +28,10 @@ export const OwnerDashboard = () => {
     isPending,
     isError,
     refetch,
-  } = useGetAllQuery<Car[]>({
+  } = useGetAllQuery<PaginatedCars>({
     key: 'cars',
     url: '/car',
+    params: { limit: 100 },
     schema: carListSchema,
   });
 
@@ -42,7 +43,7 @@ export const OwnerDashboard = () => {
     return <DataErrorState onRetry={refetch} />;
   }
 
-  const cars = carsResponse?.data ?? [];
+  const cars = carsResponse?.data.data ?? [];
   const soldCars = cars.filter((car) => car.status === CarStatus.SOLD);
   const availableCars = cars.filter(
     (car) => car.status === CarStatus.AVAILABLE,

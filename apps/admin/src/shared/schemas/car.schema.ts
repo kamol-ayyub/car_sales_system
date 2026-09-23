@@ -1,4 +1,4 @@
-import { z } from '@repo/api';
+import { paginatedSchema, type Paginated, z } from '@repo/api';
 import { carStatusSchema } from '@repo/api/car-status';
 
 const carPartySchema = z
@@ -29,6 +29,7 @@ export const carSchema = z
   })
   .loose();
 
-export const carListSchema = z.array(carSchema);
+export const carListSchema = paginatedSchema(carSchema);
 
 export type Car = z.infer<typeof carSchema>;
+export type PaginatedCars = Paginated<Car>;
