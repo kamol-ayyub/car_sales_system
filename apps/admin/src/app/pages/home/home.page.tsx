@@ -1,6 +1,5 @@
 import { useGetAllQuery } from '@repo/api';
 import { OwnerDashboard, SalespersonDashboard } from '@/features/dashboard';
-import { Page } from '@/shared/components/page';
 import { meResponseSchema } from '@/shared/schemas/auth.schema';
 import { UserRole, type UserDetails } from '@/shared/types/auth-types';
 
@@ -41,10 +40,5 @@ export const HomePage = () => {
     return <OwnerDashboard />;
   }
 
-  return (
-    <Page
-      title={`Welcome, ${user.name}`}
-      description='Your client dashboard will appear here.'
-    />
-  );
+  return null;
 };

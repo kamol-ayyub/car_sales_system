@@ -30,7 +30,7 @@ export const setAccessToken = (token: string | null): void => {
 };
 
 // Leading slash is optional: instance requests use relative URLs like 'auth/login'
-const AUTH_PATH_PATTERN = /^\/?auth\/(login|register|refresh|logout)(?:\?|$)/;
+const AUTH_PATH_PATTERN = /^\/?auth\/(login|refresh|logout)(?:\?|$)/;
 
 let refreshRequest: Promise<string | undefined> | null = null;
 

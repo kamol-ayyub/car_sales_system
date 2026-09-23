@@ -104,7 +104,7 @@ export const authenticatedGuard = createRoute({
     router.navigate({ to: '/login' });
   },
   async beforeLoad() {
-    await requireRole([UserRole.Owner, UserRole.SalesPerson, UserRole.Client]);
+    await requireRole([UserRole.Owner, UserRole.SalesPerson]);
   },
 });
 
@@ -129,18 +129,6 @@ export const salesPersonGuard = createRoute({
   },
   async beforeLoad() {
     await requireRole([UserRole.Owner, UserRole.SalesPerson]);
-  },
-});
-
-export const clientGuard = createRoute({
-  getParentRoute: () => layoutRoute,
-  id: 'client-route',
-  notFoundComponent: NotFoundPage,
-  onError: () => {
-    router.navigate({ to: '/login' });
-  },
-  async beforeLoad() {
-    await requireRole(UserRole.Client);
   },
 });
 
@@ -227,7 +215,6 @@ const routeTree = rootRoute.addChildren([
       customersRoute,
     ]),
     ownerGuard.addChildren([salespeopleRoute, reportsRoute]),
-    clientGuard.addChildren([]),
   ]),
   loginRoute,
 ]);

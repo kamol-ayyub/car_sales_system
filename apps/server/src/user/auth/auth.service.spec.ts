@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { PasswordService } from '../password/password.service';
 import { UserService } from '../user.service';
-import { RegisterDto } from './register.dto';
 import { User, UserRole } from '../entities/user.entity';
 import { hashToken } from './token-hash';
 
@@ -15,7 +14,6 @@ describe('AuthService', () => {
     Pick<
       UserService,
       | 'findByEmail'
-      | 'create'
       | 'findById'
       | 'incrementTokenVersion'
       | 'setRefreshTokenHash'
@@ -52,13 +50,6 @@ describe('AuthService', () => {
     updatedAt: new Date(),
   };
 
-  const registerDto: RegisterDto = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: undefined,
-    password: 'secret123',
-  };
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -67,7 +58,6 @@ describe('AuthService', () => {
           provide: UserService,
           useValue: {
             findByEmail: jest.fn(),
-            create: jest.fn(),
             findById: jest.fn(),
             incrementTokenVersion: jest.fn(),
             setRefreshTokenHash: jest.fn(),
@@ -105,40 +95,6 @@ describe('AuthService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-  });
-
-  describe('register', () => {
-    it('should create a user with CLIENT role and return tokens', async () => {
-      usersService.findByEmail.mockResolvedValue(null);
-      usersService.create.mockResolvedValue(user);
-      jwtService.signAsync
-        .mockResolvedValueOnce('access-token')
-        .mockResolvedValueOnce('refresh-token');
-
-      const result = await service.register(registerDto);
-
-      expect(usersService.create).toHaveBeenCalledWith({
-        ...registerDto,
-        roles: [UserRole.CLIENT],
-      });
-      expect(usersService.setRefreshTokenHash).toHaveBeenCalledWith(
-        user.id,
-        hashToken('refresh-token'),
-      );
-      expect(result).toEqual({
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
-      });
-    });
-
-    it('should throw ConflictException when email is already taken', async () => {
-      usersService.findByEmail.mockResolvedValue(user);
-
-      await expect(service.register(registerDto)).rejects.toThrow(
-        ConflictException,
-      );
-      expect(usersService.create).not.toHaveBeenCalled();
-    });
   });
 
   describe('login', () => {

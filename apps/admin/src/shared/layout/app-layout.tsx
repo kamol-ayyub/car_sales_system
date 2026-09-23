@@ -3,7 +3,6 @@ import { useGetAllQuery } from '@repo/api';
 import { meResponseSchema } from '@/shared/schemas/auth.schema';
 import { UserRole, type UserDetails } from '@/shared/types/auth-types';
 import { AdminShell } from './admin-shell';
-import { ClientLayout } from './client-layout';
 
 interface AppLayoutProps {
   children?: ReactNode;
@@ -39,13 +38,20 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     );
   }
 
-  const isClientOnly =
-    user.roles.includes(UserRole.Client) &&
-    !user.roles.includes(UserRole.SalesPerson) &&
-    !user.roles.includes(UserRole.Owner);
+  const hasAdminAccess =
+    user.roles.includes(UserRole.Owner) ||
+    user.roles.includes(UserRole.SalesPerson);
 
-  if (isClientOnly) {
-    return <ClientLayout>{children}</ClientLayout>;
+  if (!hasAdminAccess) {
+    return (
+      <div
+        role='alert'
+        className='flex min-h-svh items-center justify-center p-6 text-center text-sm text-muted-foreground'
+      >
+        Your account doesn't have access to the admin dashboard. Please contact
+        your dealership.
+      </div>
+    );
   }
 
   return <AdminShell user={user}>{children}</AdminShell>;

@@ -1,11 +1,6 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { RegisterDto } from './register.dto';
 import { User, UserRole } from '../entities/user.entity';
 import { PasswordService } from '../password/password.service';
 import { UserService } from '../user.service';
@@ -38,20 +33,6 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {
     this.authConfig = this.configService.get<AuthConfig>('auth')!.jwt;
-  }
-
-  public async register(registerDto: RegisterDto): Promise<AuthTokens> {
-    const isUserExist = await this.usersService.findByEmail(registerDto.email);
-    if (isUserExist) {
-      throw new ConflictException('Email already exists');
-    }
-
-    const user = await this.usersService.create({
-      ...registerDto,
-      roles: [UserRole.CLIENT],
-    });
-
-    return this.generateTokens(user);
   }
 
   public async login(email: string, password: string): Promise<AuthTokens> {

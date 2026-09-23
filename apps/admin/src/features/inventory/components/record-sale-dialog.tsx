@@ -1,5 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { UserPlusIcon } from 'lucide-react';
+import { useDebouncedValue } from '@/shared/hooks/use-debounced-value';
+import {
+  meResponseSchema,
+  type MeResponse,
+} from '@/shared/schemas/auth.schema';
+import { carSchema, type Car } from '@/shared/schemas/car.schema';
+import {
+  userListSchema,
+  type PaginatedUsers,
+} from '@/shared/schemas/user.schema';
+import { formatCurrency } from '@/shared/utils/format-currency';
+import { getApiErrorMessage } from '@/shared/utils/get-api-error-message';
 import { useGetAllQuery, usePostQuery } from '@repo/api';
 import { Button } from '@repo/ui/components/button';
 import {
@@ -30,20 +40,16 @@ import { Input } from '@repo/ui/components/input';
 import { Spinner } from '@repo/ui/components/spinner';
 import { toast } from '@repo/ui/components/toast';
 import { Controller, useForm, zodResolver } from '@repo/ui/lib/form';
-import { meResponseSchema, type MeResponse } from '@/shared/schemas/auth.schema';
-import { carSchema, type Car } from '@/shared/schemas/car.schema';
-import {
-  userListSchema,
-  type PaginatedUsers,
-} from '@/shared/schemas/user.schema';
-import { useDebouncedValue } from '@/shared/hooks/use-debounced-value';
-import { formatCurrency } from '@/shared/utils/format-currency';
-import { getApiErrorMessage } from '@/shared/utils/get-api-error-message';
-import { sellCarFormSchema, type SellCarFormValues } from '../schemas/sell-car.schema';
+import { UserPlusIcon } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   createClientFormSchema,
   type CreateClientFormValues,
 } from '../schemas/create-client.schema';
+import {
+  sellCarFormSchema,
+  type SellCarFormValues,
+} from '../schemas/sell-car.schema';
 
 interface RecordSaleDialogProps {
   car: Car;
@@ -151,19 +157,18 @@ export const RecordSaleDialog = ({ car, onUndo }: RecordSaleDialogProps) => {
   });
 
   const clients = useMemo<MeResponse[]>(() => {
-    const byId = new Map<string, MeResponse>();
-    for (const client of clientsResponse?.data.data ?? previousClients) {
-      byId.set(client.id, client);
+    const map = new Map<string, MeResponse>();
+    const all = [
+      ...(clientsResponse?.data.data ?? previousClients),
+      ...createdClients,
+      ...(selectedClient ? [selectedClient] : []),
+    ];
+
+    for (const client of all) {
+      map.set(client.id, client);
     }
-    for (const client of createdClients) {
-      if (!byId.has(client.id)) {
-        byId.set(client.id, client);
-      }
-    }
-    if (selectedClient && !byId.has(selectedClient.id)) {
-      byId.set(selectedClient.id, selectedClient);
-    }
-    return Array.from(byId.values());
+
+    return Array.from(map.values());
   }, [clientsResponse, previousClients, createdClients, selectedClient]);
 
   const clientItems = useMemo<ClientOption[]>(

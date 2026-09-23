@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import { UserRole } from '@/shared/types/auth-types';
 import {
   CarIcon,
   ContactIcon,
@@ -8,7 +8,7 @@ import {
   TrendingUpIcon,
   UsersIcon,
 } from 'lucide-react';
-import { UserRole } from '@/shared/types/auth-types';
+import type { ComponentType } from 'react';
 
 export type NavPath =
   | '/home'
@@ -32,7 +32,7 @@ export const navItems: NavItem[] = [
     to: '/home',
     label: 'Dashboard',
     icon: LayoutDashboardIcon,
-    roles: [UserRole.Owner, UserRole.SalesPerson, UserRole.Client],
+    roles: [UserRole.Owner, UserRole.SalesPerson],
   },
   {
     to: '/inventory',
@@ -69,7 +69,7 @@ export const navItems: NavItem[] = [
     to: '/settings',
     label: 'Settings',
     icon: SettingsIcon,
-    roles: [UserRole.Owner, UserRole.SalesPerson, UserRole.Client],
+    roles: [UserRole.Owner, UserRole.SalesPerson],
   },
 ];
 

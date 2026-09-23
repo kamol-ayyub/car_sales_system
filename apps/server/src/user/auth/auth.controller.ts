@@ -13,7 +13,6 @@ import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { ZodSerializerDto } from 'nestjs-zod';
 import type { Request, Response } from 'express';
 import { Public } from '../decorators/public.decorator';
-import { RegisterDto } from './register.dto';
 import { AuthService, type AuthTokens } from './auth.service';
 import { LoginResponse } from './login-response';
 import { LoginDto } from './login.dto';
@@ -29,20 +28,6 @@ const refreshThrottle = { default: { limit: 10, ttl: 60_000 } };
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  @Post('register')
-  @Public()
-  @HttpCode(HttpStatus.CREATED)
-  @UseGuards(ThrottlerGuard)
-  @Throttle(authThrottle)
-  @ZodSerializerDto(LoginResponse)
-  async register(
-    @Body() registerDto: RegisterDto,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<LoginResponse> {
-    const tokens = await this.authService.register(registerDto);
-    return this.respondWithTokens(res, tokens);
-  }
 
   @Public()
   @Post('login')
