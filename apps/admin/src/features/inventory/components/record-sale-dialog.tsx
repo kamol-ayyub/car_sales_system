@@ -3,6 +3,7 @@ import {
   meResponseSchema,
   type MeResponse,
 } from '@/shared/schemas/auth.schema';
+import { QUERY_KEYS } from '@/shared/constants/query-keys';
 import { carSchema, type Car } from '@/shared/schemas/car.schema';
 import {
   userListSchema,
@@ -93,7 +94,7 @@ export const RecordSaleDialog = ({ car, onUndo }: RecordSaleDialogProps) => {
     isError: areClientsError,
     refetch: refetchClients,
   } = useGetAllQuery<PaginatedUsers>({
-    key: 'clients',
+    key: QUERY_KEYS.clients,
     url: '/user/clients',
     params: debouncedSearch
       ? { limit: 100, search: debouncedSearch.slice(0, 100) }
@@ -118,8 +119,8 @@ export const RecordSaleDialog = ({ car, onUndo }: RecordSaleDialogProps) => {
     SellCarBody,
     Car
   >({
-    key: `car-${car.id}`,
-    listKey: 'cars',
+    key: QUERY_KEYS.car(car.id),
+    listKey: QUERY_KEYS.cars,
     schema: carSchema,
   });
 
@@ -127,7 +128,7 @@ export const RecordSaleDialog = ({ car, onUndo }: RecordSaleDialogProps) => {
     CreateClientBody,
     MeResponse
   >({
-    key: 'clients',
+    key: QUERY_KEYS.clients,
     schema: meResponseSchema,
   });
 

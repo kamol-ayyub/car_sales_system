@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/shared/constants/query-keys';
 import { apiErrorSchema } from '@/shared/schemas/api-error.schema';
 import { carSchema, type Car } from '@/shared/schemas/car.schema';
 import { getApiErrorMessage } from '@/shared/utils/get-api-error-message';
@@ -40,7 +41,7 @@ export const CreateCarDialog = () => {
   const formErrorRef = useRef<HTMLParagraphElement>(null);
 
   const { mutate: createCar, isPending } = usePostQuery<CreateCarBody, Car>({
-    key: 'cars',
+    key: QUERY_KEYS.cars,
     schema: carSchema,
   });
 
@@ -146,7 +147,8 @@ export const CreateCarDialog = () => {
         <DialogHeader>
           <DialogTitle>Add a car</DialogTitle>
           <DialogDescription>
-            Add a vehicle to inventory. It becomes available for sale right away.
+            Add a vehicle to inventory. It becomes available for sale right
+            away.
           </DialogDescription>
         </DialogHeader>
 
@@ -167,7 +169,9 @@ export const CreateCarDialog = () => {
                   autoComplete='off'
                   placeholder='Toyota'
                   aria-invalid={errors.brand ? true : undefined}
-                  aria-describedby={errors.brand ? 'car-brand-error' : undefined}
+                  aria-describedby={
+                    errors.brand ? 'car-brand-error' : undefined
+                  }
                   {...register('brand')}
                 />
                 <FieldError
@@ -185,7 +189,9 @@ export const CreateCarDialog = () => {
                   autoComplete='off'
                   placeholder='Corolla'
                   aria-invalid={errors.model ? true : undefined}
-                  aria-describedby={errors.model ? 'car-model-error' : undefined}
+                  aria-describedby={
+                    errors.model ? 'car-model-error' : undefined
+                  }
                   {...register('model')}
                 />
                 <FieldError
@@ -210,7 +216,9 @@ export const CreateCarDialog = () => {
                   placeholder='2024'
                   aria-invalid={errors.year ? true : undefined}
                   aria-describedby={
-                    errors.year ? 'car-year-hint car-year-error' : 'car-year-hint'
+                    errors.year
+                      ? 'car-year-hint car-year-error'
+                      : 'car-year-hint'
                   }
                   {...register('year')}
                 />
@@ -279,13 +287,17 @@ export const CreateCarDialog = () => {
             </Field>
 
             <Field data-invalid={errors.images ? true : undefined}>
-              <FieldLabel htmlFor='car-images'>Photo URLs (optional)</FieldLabel>
+              <FieldLabel htmlFor='car-images'>
+                Photo URLs (optional)
+              </FieldLabel>
               <Textarea
                 id='car-images'
                 rows={3}
                 autoComplete='off'
                 spellCheck={false}
-                placeholder={'https://example.com/car-front.jpg\nhttps://example.com/car-rear.jpg'}
+                placeholder={
+                  'https://example.com/car-front.jpg\nhttps://example.com/car-rear.jpg'
+                }
                 className='font-mono text-sm'
                 aria-invalid={errors.images ? true : undefined}
                 aria-describedby={

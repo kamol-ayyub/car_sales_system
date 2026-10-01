@@ -1,4 +1,5 @@
 import { setAccessToken } from '@/config/axios-config';
+import { QUERY_KEYS } from '@/shared/constants/query-keys';
 import { getApiErrorMessage } from '@/shared/utils/get-api-error-message';
 import {
   loginResponseSchema,
@@ -35,7 +36,7 @@ export const LoginForm = () => {
   });
 
   const { mutate, isPending } = usePostQuery<LoginFormValues, LoginResponse>({
-    key: 'login',
+    key: QUERY_KEYS.login,
     schema: loginResponseSchema,
   });
 

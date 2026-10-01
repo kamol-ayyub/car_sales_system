@@ -1,3 +1,4 @@
+import { QUERY_KEYS } from '@/shared/constants/query-keys';
 import { carListSchema, type PaginatedCars } from '@/shared/schemas/car.schema';
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value';
 import { useGetAllQuery } from '@repo/api';
@@ -32,7 +33,7 @@ export const InventoryView = ({
   const activeSearch = debouncedSearch.trim();
 
   const { data, isPending, isError, refetch } = useGetAllQuery<PaginatedCars>({
-    key: 'cars',
+    key: QUERY_KEYS.cars,
     url: '/car',
     params: {
       page,

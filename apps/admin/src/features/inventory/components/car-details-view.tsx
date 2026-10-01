@@ -15,6 +15,7 @@ import { toast } from "@repo/ui/components/toast";
 import { CheckIcon } from "lucide-react";
 import { DataErrorState } from "@/shared/components/data-error-state";
 import { Page } from "@/shared/components/page";
+import { QUERY_KEYS } from "@/shared/constants/query-keys";
 import { carSchema, type Car } from "@/shared/schemas/car.schema";
 import { formatCurrency } from "@/shared/utils/format-currency";
 import { carStatusLabels } from "../car-status-labels";
@@ -31,15 +32,15 @@ interface CarDetailsViewProps {
 
 export const CarDetailsView = ({ carId }: CarDetailsViewProps) => {
   const { data, isPending, isError, refetch } = useGetAllQuery<Car>({
-    key: `car-${carId}`,
+    key: QUERY_KEYS.car(carId),
     url: `/car/${carId}`,
     schema: carSchema,
     enabled: Boolean(carId),
   });
 
   const { mutate: undoSale } = usePostQuery<Record<string, never>, Car>({
-    key: `car-${carId}`,
-    listKey: "cars",
+    key: QUERY_KEYS.car(carId),
+    listKey: QUERY_KEYS.cars,
     schema: carSchema,
   });
 

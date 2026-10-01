@@ -1,6 +1,7 @@
 import { DataErrorState } from '@/shared/components/data-error-state';
 import { Page } from '@/shared/components/page';
 import { useDebouncedValue } from '@/shared/hooks/use-debounced-value';
+import { QUERY_KEYS } from '@/shared/constants/query-keys';
 import { userListSchema, type PaginatedUsers } from '@/shared/schemas/user.schema';
 import { UserRole } from '@/shared/types/auth-types';
 import { useGetAllQuery } from '@repo/api';
@@ -19,7 +20,7 @@ export const SalespeopleView = () => {
   const activeSearch = debouncedSearch.trim();
 
   const { data, isPending, isError, refetch } = useGetAllQuery<PaginatedUsers>({
-    key: 'salespeople',
+    key: QUERY_KEYS.salespeople,
     url: '/user',
     params: {
       role: UserRole.SalesPerson,

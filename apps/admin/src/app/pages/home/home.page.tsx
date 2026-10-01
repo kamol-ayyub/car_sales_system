@@ -1,16 +1,23 @@
 import { useGetAllQuery } from '@repo/api';
-import { OwnerDashboard, SalespersonDashboard } from '@/features/dashboard';
+import {
+  OwnerDashboard,
+  SalespersonDashboard,
+  usePrefetchPages,
+} from '@/features/dashboard';
+import { QUERY_KEYS } from '@/shared/constants/query-keys';
 import { meResponseSchema } from '@/shared/schemas/auth.schema';
 import { UserRole, type UserDetails } from '@/shared/types/auth-types';
 
 export const HomePage = () => {
   const { data, isError } = useGetAllQuery<UserDetails>({
-    key: 'user-details',
+    key: QUERY_KEYS.userDetails,
     url: '/user/me',
     schema: meResponseSchema,
   });
 
   const user = data?.data;
+
+  usePrefetchPages(user);
 
   if (isError) {
     return (

@@ -1,5 +1,6 @@
 import { DataErrorState } from '@/shared/components/data-error-state';
 import { Page } from '@/shared/components/page';
+import { QUERY_KEYS } from '@/shared/constants/query-keys';
 import { carListSchema, type PaginatedCars } from '@/shared/schemas/car.schema';
 import type { UserDetails } from '@/shared/types/auth-types';
 import { formatCurrency } from '@/shared/utils/format-currency';
@@ -31,7 +32,7 @@ export const SalespersonDashboard = ({ user }: SalespersonDashboardProps) => {
     isError,
     refetch,
   } = useGetAllQuery<PaginatedCars>({
-    key: 'cars',
+    key: QUERY_KEYS.cars,
     url: '/car',
     params: { limit: 100 },
     schema: carListSchema,

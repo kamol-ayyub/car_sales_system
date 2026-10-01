@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useGetAllQuery } from '@repo/api';
+import { QUERY_KEYS } from '@/shared/constants/query-keys';
 import { meResponseSchema } from '@/shared/schemas/auth.schema';
 import { UserRole, type UserDetails } from '@/shared/types/auth-types';
 import { AdminShell } from './admin-shell';
@@ -10,7 +11,7 @@ interface AppLayoutProps {
 
 export const AppLayout = ({ children }: AppLayoutProps) => {
   const { data, isError } = useGetAllQuery<UserDetails>({
-    key: 'user-details',
+    key: QUERY_KEYS.userDetails,
     url: '/user/me',
     schema: meResponseSchema,
   });

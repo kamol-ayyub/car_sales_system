@@ -3,14 +3,38 @@ import { getAxiosInstance } from "./axios-instance";
 import type { AxiosError, AxiosResponse, AxiosRequestConfig } from "axios";
 import { validateResponse, type ValidatableSchema } from "./validate-response";
 
-export interface UseGetAllQueryProps {
+export interface GetQueryConfig {
   key?: string;
   url: string;
   params?: Record<string, unknown>;
   config?: AxiosRequestConfig;
+  schema?: ValidatableSchema;
+}
+
+export const buildGetQueryKey = (
+  key: string,
+  params?: Record<string, unknown>,
+): unknown[] =>
+  params && Object.keys(params).length > 0 ? [key, params] : [key];
+
+export const createGetQueryFn =
+  <T = unknown>(
+    url: string,
+    params?: Record<string, unknown>,
+    config?: AxiosRequestConfig,
+    schema?: ValidatableSchema,
+  ) =>
+  async () => {
+    const response = await getAxiosInstance().get<T>(url, {
+      params,
+      ...config,
+    });
+    return validateResponse(response, schema, url);
+  };
+
+export interface UseGetAllQueryProps extends GetQueryConfig {
   enabled?: boolean;
   refetchInterval?: number;
-  schema?: ValidatableSchema;
 }
 
 export const useGetAllQuery = <T = unknown>({
@@ -22,18 +46,9 @@ export const useGetAllQuery = <T = unknown>({
   refetchInterval,
   schema,
 }: UseGetAllQueryProps): UseQueryResult<AxiosResponse<T>, AxiosError> => {
-  const queryKey =
-    params && Object.keys(params).length > 0 ? [key, params] : [key];
-
   return useQuery<AxiosResponse<T>, AxiosError>({
-    queryKey,
-    queryFn: async () => {
-      const response = await getAxiosInstance().get<T>(url, {
-        params,
-        ...config,
-      });
-      return validateResponse(response, schema, url);
-    },
+    queryKey: buildGetQueryKey(key, params),
+    queryFn: createGetQueryFn<T>(url, params, config, schema),
     enabled,
     refetchInterval,
   });

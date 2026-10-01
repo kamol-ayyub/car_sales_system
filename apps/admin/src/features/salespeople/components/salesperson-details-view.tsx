@@ -1,6 +1,7 @@
 import { DataErrorState } from '@/shared/components/data-error-state';
 import { Page } from '@/shared/components/page';
 import { meResponseSchema, type MeResponse } from '@/shared/schemas/auth.schema';
+import { QUERY_KEYS } from '@/shared/constants/query-keys';
 import { carListSchema, type PaginatedCars } from '@/shared/schemas/car.schema';
 import { formatCurrency } from '@/shared/utils/format-currency';
 import { useGetAllQuery } from '@repo/api';
@@ -37,7 +38,7 @@ export const SalespersonDetailsView = ({
     isError,
     refetch,
   } = useGetAllQuery<MeResponse>({
-    key: `salesperson-${salesPersonId}`,
+    key: QUERY_KEYS.salesperson(salesPersonId),
     url: `/user/${salesPersonId}`,
     schema: meResponseSchema,
     enabled: Boolean(salesPersonId),
@@ -49,7 +50,7 @@ export const SalespersonDetailsView = ({
     isError: areCarsError,
     refetch: refetchCars,
   } = useGetAllQuery<PaginatedCars>({
-    key: `salesperson-${salesPersonId}-cars`,
+    key: QUERY_KEYS.salespersonCars(salesPersonId),
     url: '/car',
     params: { limit: 100, salesPersonId },
     schema: carListSchema,

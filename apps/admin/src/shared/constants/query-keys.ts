@@ -1,0 +1,11 @@
+export const QUERY_KEYS = {
+  userDetails: 'user-details',
+  cars: 'cars',
+  clients: 'clients',
+  salespeople: 'salespeople',
+  car: (id: string) => `car-${id}`,
+  salesperson: (id: string) => `salesperson-${id}`,
+  salespersonCars: (id: string) => `salesperson-${id}-cars`,
+  login: 'login',
+  logout: 'logout',
+} as const;

@@ -1,5 +1,9 @@
 export { useGetAllQuery, type UseGetAllQueryProps } from './use-get-query';
 export {
+  prefetchGetQuery,
+  type PrefetchGetQueryProps,
+} from './prefetch-get-query';
+export {
   usePostQuery,
   type UsePostQueryProps,
   type PostMutationArgs,
