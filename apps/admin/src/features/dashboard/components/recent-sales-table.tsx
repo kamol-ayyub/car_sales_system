@@ -1,5 +1,4 @@
 import { formatShortDate } from '@repo/utils';
-import type { Car } from '@/shared/schemas/car.schema';
 import { formatCurrency } from '@/shared/utils/format-currency';
 import {
   Card,
@@ -18,8 +17,19 @@ import {
   TableRow,
 } from '@repo/ui/components/table';
 
+export interface RecentSaleRow {
+  id: string;
+  brand: string;
+  model: string;
+  soldAt?: string | null;
+  salePrice?: number | null;
+  price?: number | null;
+  client?: { name?: string | null } | null;
+  salesPerson?: { name?: string | null } | null;
+}
+
 interface RecentSalesTableProps {
-  cars: Car[];
+  cars: RecentSaleRow[];
   title?: string;
 }
 
@@ -65,7 +75,7 @@ export const RecentSalesTable = ({
                     {car.soldAt ? formatShortDate(car.soldAt) : '—'}
                   </TableCell>
                   <TableCell className='text-right tabular-nums'>
-                    {formatCurrency(car.salePrice ?? car.price)}
+                    {formatCurrency(car.salePrice ?? car.price ?? 0)}
                   </TableCell>
                 </TableRow>
               ))}

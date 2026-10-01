@@ -1,6 +1,7 @@
 import { AppService } from '@/app.service';
 import { CarModule } from '@/car/car.module';
 import { Car } from '@/car/entities/car.entity';
+import { DashboardModule } from '@/dashboard/dashboard.module';
 import { appConfigSchema } from '@/config/config.types';
 import { authConfig } from '@/config/auth.config';
 import { TypedConfigService } from '@/config/typed-config.service';
@@ -41,6 +42,7 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
     }),
     CarModule,
     UserModule,
+    DashboardModule,
   ],
 
   controllers: [],

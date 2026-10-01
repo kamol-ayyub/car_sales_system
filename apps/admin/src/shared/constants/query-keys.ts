@@ -3,6 +3,7 @@ export const QUERY_KEYS = {
   cars: 'cars',
   clients: 'clients',
   salespeople: 'salespeople',
+  ownerDashboard: 'owner-dashboard',
   car: (id: string) => `car-${id}`,
   salesperson: (id: string) => `salesperson-${id}`,
   salespersonCars: (id: string) => `salesperson-${id}-cars`,

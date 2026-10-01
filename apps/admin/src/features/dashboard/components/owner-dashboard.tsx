@@ -1,10 +1,12 @@
 import { DataErrorState } from '@/shared/components/data-error-state';
 import { Page } from '@/shared/components/page';
 import { QUERY_KEYS } from '@/shared/constants/query-keys';
-import { carListSchema, type PaginatedCars } from '@/shared/schemas/car.schema';
+import {
+  ownerDashboardSchema,
+  type OwnerDashboard as OwnerDashboardStats,
+} from '@/shared/schemas/dashboard.schema';
 import { formatCurrency } from '@/shared/utils/format-currency';
 import { useGetAllQuery } from '@repo/api';
-import { CarStatus } from '@repo/api/car-status';
 import { Button } from '@repo/ui/components/button';
 import {
   Card,
@@ -25,15 +27,14 @@ import { RecentSalesTable } from './recent-sales-table';
 
 export const OwnerDashboard = () => {
   const {
-    data: carsResponse,
+    data: response,
     isPending,
     isError,
     refetch,
-  } = useGetAllQuery<PaginatedCars>({
-    key: QUERY_KEYS.cars,
-    url: '/car',
-    params: { limit: 100 },
-    schema: carListSchema,
+  } = useGetAllQuery<OwnerDashboardStats>({
+    key: QUERY_KEYS.ownerDashboard,
+    url: '/dashboard/owner',
+    schema: ownerDashboardSchema,
   });
 
   if (isPending) {
@@ -44,34 +45,21 @@ export const OwnerDashboard = () => {
     return <DataErrorState onRetry={refetch} />;
   }
 
-  const cars = carsResponse?.data.data ?? [];
-  const soldCars = cars.filter((car) => car.status === CarStatus.SOLD);
-  const availableCars = cars.filter(
-    (car) => car.status === CarStatus.AVAILABLE,
-  );
-  const revenue = soldCars.reduce(
-    (total, car) => total + (car.salePrice ?? car.price),
-    0,
-  );
+  const dashboard = response?.data;
+  if (!dashboard) {
+    return <DashboardSkeleton />;
+  }
 
-  const teamSize = new Set(
-    cars.map((car) => car.salesPerson?.id).filter(Boolean),
-  ).size;
-  const recentSales = [...soldCars]
-    .sort((a, b) => (b.soldAt ?? '').localeCompare(a.soldAt ?? ''))
-    .slice(0, 5);
+  const {
+    revenue,
+    soldCarsCount,
+    availableCarsCount,
+    teamSize,
+    recentSales,
+    topBrands,
+  } = dashboard;
 
-  const brandCounts = Array.from(
-    availableCars.reduce((counts, car) => {
-      counts.set(car.brand, (counts.get(car.brand) ?? 0) + 1);
-      return counts;
-    }, new Map<string, number>()),
-  )
-    .map(([brand, count]) => ({ brand, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
-
-  const topBrandCount = brandCounts[0]?.count ?? 1;
+  const topBrandCount = topBrands[0]?.count ?? 1;
 
   return (
     <Page
@@ -87,16 +75,16 @@ export const OwnerDashboard = () => {
         <MetricCard
           title='Revenue'
           value={formatCurrency(revenue)}
-          hint={`${soldCars.length} cars sold`}
+          hint={`${soldCarsCount} cars sold`}
         />
         <MetricCard
           title='Available stock'
-          value={String(availableCars.length)}
+          value={String(availableCarsCount)}
           hint='Ready to sell'
         />
         <MetricCard
           title='Cars sold'
-          value={String(soldCars.length)}
+          value={String(soldCarsCount)}
           hint='All time'
         />
         <MetricCard
@@ -113,7 +101,7 @@ export const OwnerDashboard = () => {
             <CardTitle>Available inventory by brand</CardTitle>
           </CardHeader>
           <CardContent className='flex flex-col gap-3'>
-            {brandCounts.length === 0 ? (
+            {topBrands.length === 0 ? (
               <Empty className='p-6'>
                 <EmptyHeader>
                   <EmptyTitle className='text-sm font-medium'>
@@ -125,7 +113,7 @@ export const OwnerDashboard = () => {
                 </EmptyHeader>
               </Empty>
             ) : (
-              brandCounts.map(({ brand, count }) => (
+              topBrands.map(({ brand, count }) => (
                 <div key={brand} className='flex items-center gap-3'>
                   <span className='w-24 truncate text-sm'>{brand}</span>
                   <div
