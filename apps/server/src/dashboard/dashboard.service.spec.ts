@@ -50,10 +50,13 @@ const soldCar: Car = {
 
 interface QueryBuilderMock {
   leftJoin: jest.Mock;
+  innerJoin: jest.Mock;
   select: jest.Mock;
   addSelect: jest.Mock;
   where: jest.Mock;
+  andWhere: jest.Mock;
   groupBy: jest.Mock;
+  addGroupBy: jest.Mock;
   orderBy: jest.Mock;
   addOrderBy: jest.Mock;
   limit: jest.Mock;
@@ -99,10 +102,13 @@ describe('DashboardService', () => {
 
       const queryBuilder: QueryBuilderMock = {
         leftJoin: jest.fn().mockReturnThis(),
+        innerJoin: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
         addSelect: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
         groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         addOrderBy: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
@@ -162,10 +168,13 @@ describe('DashboardService', () => {
 
       const queryBuilder: QueryBuilderMock = {
         leftJoin: jest.fn().mockReturnThis(),
+        innerJoin: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
         addSelect: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
         groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         addOrderBy: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
@@ -184,6 +193,70 @@ describe('DashboardService', () => {
         teamSize: 0,
         recentSales: [],
         topBrands: [],
+      });
+    });
+  });
+
+  describe('getSalespersonDashboard', () => {
+    it('aggregates the salesperson metrics across the full dataset', async () => {
+      carRepository.count.mockImplementation(
+        ({ where }: { where: { status: CarStatus } }) =>
+          Promise.resolve(where.status === CarStatus.SOLD ? 7 : 88),
+      );
+
+      const queryBuilder: QueryBuilderMock = {
+        leftJoin: jest.fn().mockReturnThis(),
+        innerJoin: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        getRawOne: jest.fn().mockResolvedValue({ revenue: '120000.00' }),
+        getRawMany: jest.fn().mockResolvedValue([
+          { id: 'sales-uuid', name: 'Sales Person', count: '12' },
+          { id: 'other-uuid', name: 'Other Seller', count: '5' },
+        ]),
+      };
+      carRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+      carRepository.find.mockResolvedValueOnce([{ ...soldCar }]);
+
+      const result = await service.getSalespersonDashboard('sales-uuid');
+
+      expect(carRepository.count).toHaveBeenCalledWith({
+        where: { status: CarStatus.SOLD, salesPerson: { id: 'sales-uuid' } },
+      });
+      expect(carRepository.count).toHaveBeenCalledWith({
+        where: { status: CarStatus.AVAILABLE },
+      });
+      expect(carRepository.find).toHaveBeenCalledWith({
+        where: { status: CarStatus.SOLD, salesPerson: { id: 'sales-uuid' } },
+        relations: { client: true },
+        order: { soldAt: 'DESC' },
+        take: 5,
+      });
+      expect(result).toEqual({
+        mySalesCount: 7,
+        myRevenue: 120000,
+        availableCarsCount: 88,
+        recentSales: [
+          {
+            id: 'sold-uuid',
+            brand: 'Toyota',
+            model: 'Corolla',
+            soldAt: '2026-01-15T10:00:00.000Z',
+            salePrice: 18500,
+            client: { id: 'client-uuid', name: 'Client' },
+          },
+        ],
+        standings: [
+          { id: 'sales-uuid', name: 'Sales Person', count: 12 },
+          { id: 'other-uuid', name: 'Other Seller', count: 5 },
+        ],
       });
     });
   });

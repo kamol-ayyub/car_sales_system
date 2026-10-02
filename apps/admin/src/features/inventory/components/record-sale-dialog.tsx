@@ -46,7 +46,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   createClientFormSchema,
   type CreateClientFormValues,
-} from '../schemas/create-client.schema';
+} from '@/shared/schemas/create-client.schema';
 import {
   sellCarFormSchema,
   type SellCarFormValues,

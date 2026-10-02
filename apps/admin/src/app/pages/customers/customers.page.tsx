@@ -1,5 +1,5 @@
-import { Page } from '@/shared/components/page';
+import { CustomersView } from '@/features/customers';
 
 export const CustomersPage = () => {
-  return <Page title='Customers' />;
+  return <CustomersView />;
 };

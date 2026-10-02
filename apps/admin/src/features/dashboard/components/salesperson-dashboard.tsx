@@ -1,25 +1,41 @@
 import { DataErrorState } from '@/shared/components/data-error-state';
 import { Page } from '@/shared/components/page';
 import { QUERY_KEYS } from '@/shared/constants/query-keys';
-import { carListSchema, type PaginatedCars } from '@/shared/schemas/car.schema';
+import {
+  salespersonDashboardSchema,
+  type SalespersonDashboard as SalespersonDashboardStats,
+} from '@/shared/schemas/dashboard.schema';
 import type { UserDetails } from '@/shared/types/auth-types';
 import { formatCurrency } from '@/shared/utils/format-currency';
+import { truncateLabel } from '@/shared/utils/truncate-label';
 import { useGetAllQuery } from '@repo/api';
-import { CarStatus } from '@repo/api/car-status';
-import { Badge } from '@repo/ui/components/badge';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from '@repo/ui/components/card';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@repo/ui/components/chart';
 import { Empty, EmptyHeader, EmptyTitle } from '@repo/ui/components/empty';
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
 import { DashboardSkeleton } from './dashboard-skeleton';
-import { MetricCard } from './metric-card';
+import { MetricCard } from '@/shared/components/metric-card';
 import { RecentSalesTable } from './recent-sales-table';
 
 // Placeholder commission rule until the business defines the real rate.
 const COMMISSION_RATE = 0.03;
+
+const standingsChartConfig = {
+  count: {
+    label: 'Sales',
+    color: 'var(--chart-1)',
+  },
+} satisfies ChartConfig;
 
 interface SalespersonDashboardProps {
   user: UserDetails;
@@ -27,15 +43,14 @@ interface SalespersonDashboardProps {
 
 export const SalespersonDashboard = ({ user }: SalespersonDashboardProps) => {
   const {
-    data: carsResponse,
+    data: response,
     isPending,
     isError,
     refetch,
-  } = useGetAllQuery<PaginatedCars>({
-    key: QUERY_KEYS.cars,
-    url: '/car',
-    params: { limit: 100 },
-    schema: carListSchema,
+  } = useGetAllQuery<SalespersonDashboardStats>({
+    key: QUERY_KEYS.salespersonDashboard,
+    url: '/dashboard/salesperson',
+    schema: salespersonDashboardSchema,
   });
 
   if (isPending) {
@@ -46,105 +61,162 @@ export const SalespersonDashboard = ({ user }: SalespersonDashboardProps) => {
     return <DataErrorState onRetry={refetch} />;
   }
 
-  const cars = carsResponse?.data.data ?? [];
-  const soldCars = cars.filter((car) => car.status === CarStatus.SOLD);
-  const availableCars = cars.filter(
-    (car) => car.status === CarStatus.AVAILABLE,
-  );
-  const mySales = soldCars.filter((car) => car.salesPerson?.id === user.id);
-  const myRevenue = mySales.reduce(
-    (total, car) => total + (car.salePrice ?? car.price),
-    0,
-  );
-  const recentSales = [...mySales]
-    .sort((a, b) => (b.soldAt ?? '').localeCompare(a.soldAt ?? ''))
-    .slice(0, 5);
-
-  const salesByPerson = new Map<string, { name: string; count: number }>();
-  for (const car of soldCars) {
-    if (!car.salesPerson) continue;
-    const entry = salesByPerson.get(car.salesPerson.id) ?? {
-      name: car.salesPerson.name,
-      count: 0,
-    };
-    entry.count += 1;
-    salesByPerson.set(car.salesPerson.id, entry);
+  const dashboard = response?.data;
+  if (!dashboard) {
+    return <DashboardSkeleton />;
   }
-  const standings = Array.from(salesByPerson.entries())
-    .map(([id, entry]) => ({ id, ...entry }))
-    .sort((a, b) => b.count - a.count);
+
+  const {
+    mySalesCount,
+    myRevenue,
+    availableCarsCount,
+    recentSales,
+    standings,
+  } = dashboard;
+
   const myRank = standings.findIndex((entry) => entry.id === user.id);
+  const myCount = myRank >= 0 ? standings[myRank].count : 0;
+
+  const topStandings = standings.slice(0, 5);
+  const includesCurrentUser = topStandings.some(
+    (entry) => entry.id === user.id,
+  );
+  const chartStandings =
+    myRank >= 0 && !includesCurrentUser
+      ? [...topStandings, standings[myRank]]
+      : topStandings;
+
+  const standingsChartData = chartStandings.map((entry) => ({
+    id: entry.id,
+    name: entry.name,
+    count: entry.count,
+    isCurrentUser: entry.id === user.id,
+  }));
+
+  const standingsChartHeight = Math.max(200, standingsChartData.length * 40);
 
   const firstName = user.name.split(' ')[0];
 
   return (
     <Page
       title={`Welcome back, ${firstName}`}
-      description='Your sales performance at a glance.'
+      description="Your sales performance at a glance."
     >
-
-      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          title='My sales'
-          value={String(mySales.length)}
-          hint='All time'
+          title="My sales"
+          value={String(mySalesCount)}
+          hint="All time"
         />
-        <MetricCard title='My revenue' value={formatCurrency(myRevenue)} />
+        <MetricCard title="My revenue" value={formatCurrency(myRevenue)} />
         <MetricCard
-          title='Est. commission'
+          title="Est. commission"
           value={formatCurrency(myRevenue * COMMISSION_RATE)}
-          hint='Estimated at 3% — placeholder rate'
+          hint="Estimated at 3% — placeholder rate"
         />
         <MetricCard
-          title='Available stock'
-          value={String(availableCars.length)}
-          hint='Ready to sell'
+          title="Available stock"
+          value={String(availableCarsCount)}
+          hint="Ready to sell"
         />
       </div>
 
-      <div className='grid gap-4 lg:grid-cols-2'>
-        <RecentSalesTable cars={recentSales} title='My recent sales' />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <RecentSalesTable cars={recentSales} title="My recent sales" />
         <Card>
           <CardHeader>
-            <CardTitle>Team standing</CardTitle>
+            <CardTitle role="heading" aria-level={2}>
+              Team standing
+            </CardTitle>
           </CardHeader>
-          <CardContent className='flex flex-col gap-3'>
+          <CardContent className="flex flex-col gap-4">
             {myRank >= 0 ? (
-              <p className='text-sm text-muted-foreground'>
+              <p className="text-sm text-muted-foreground">
                 Rank #{myRank + 1} of {standings.length}
               </p>
             ) : null}
             {standings.length === 0 ? (
-              <Empty className='p-6'>
+              <Empty className="p-6">
                 <EmptyHeader>
-                  <EmptyTitle className='text-sm font-medium'>
+                  <EmptyTitle className="text-sm font-medium">
                     No sales recorded yet
                   </EmptyTitle>
                 </EmptyHeader>
               </Empty>
             ) : (
-              standings.slice(0, 5).map((entry, index) => (
-                <div
-                  key={entry.id}
-                  className='flex items-center justify-between gap-3 text-sm'
+              <>
+                <p className="sr-only">
+                  Horizontal bar chart of sales by team member, ranked from
+                  highest to lowest. You are ranked #{myRank + 1} of{' '}
+                  {standings.length} with {myCount}{' '}
+                  {myCount === 1 ? 'sale' : 'sales'}.
+                </p>
+                <ChartContainer
+                  config={standingsChartConfig}
+                  className="aspect-auto w-full"
+                  style={{ height: standingsChartHeight }}
                 >
-                  <span className='flex min-w-0 items-center gap-2'>
-                    <span className='w-5 text-muted-foreground tabular-nums'>
-                      {index + 1}
-                    </span>
-                    <span className='truncate'>{entry.name}</span>
-                  </span>
-                  <span className='flex items-center gap-2'>
-                    {entry.id === user.id ? (
-                      <Badge variant='secondary'>You</Badge>
-                    ) : null}
-                    <span className='text-muted-foreground tabular-nums'>
-                      {entry.count}
-                    </span>
-                  </span>
-                </div>
-              ))
+                  <BarChart
+                    accessibilityLayer
+                    data={standingsChartData}
+                    layout="vertical"
+                    margin={{ left: 8, right: 12 }}
+                  >
+                    <CartesianGrid horizontal={false} />
+                    <XAxis
+                      type="number"
+                      allowDecimals={false}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      tickLine={false}
+                      axisLine={false}
+                      width={96}
+                      tickFormatter={truncateLabel}
+                    />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent />}
+                    />
+                    <Bar dataKey="count" radius={4}>
+                      {standingsChartData.map((entry) => (
+                        <Cell
+                          key={entry.id}
+                          fill={
+                            entry.isCurrentUser
+                              ? 'var(--chart-1)'
+                              : 'var(--chart-2)'
+                          }
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              </>
             )}
+            {standings.length > 0 ? (
+              <div className="flex items-center justify-end gap-4 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <span
+                    aria-hidden="true"
+                    className="size-2 rounded-[2px]"
+                    style={{ backgroundColor: 'var(--chart-1)' }}
+                  />
+                  You
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span
+                    aria-hidden="true"
+                    className="size-2 rounded-[2px]"
+                    style={{ backgroundColor: 'var(--chart-2)' }}
+                  />
+                  Team
+                </span>
+              </div>
+            ) : null}
           </CardContent>
         </Card>
       </div>

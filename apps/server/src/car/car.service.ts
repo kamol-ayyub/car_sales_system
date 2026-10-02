@@ -54,6 +54,10 @@ export class CarService {
       });
     }
 
+    if (query.clientId) {
+      qb.andWhere('client.id = :clientId', { clientId: query.clientId });
+    }
+
     return paginate(qb, query, { searchColumns: ['brand', 'model', 'vin'] });
   }
 

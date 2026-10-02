@@ -39,3 +39,23 @@ export const ownerDashboardSchema = z
 
 export type OwnerDashboard = z.infer<typeof ownerDashboardSchema>;
 export type RecentSale = z.infer<typeof recentSaleSchema>;
+
+export const salespersonDashboardSchema = z
+  .object({
+    mySalesCount: z.coerce.number(),
+    myRevenue: z.coerce.number(),
+    availableCarsCount: z.coerce.number(),
+    recentSales: z.array(recentSaleSchema),
+    standings: z.array(
+      z
+        .object({
+          id: z.string(),
+          name: z.string(),
+          count: z.coerce.number(),
+        })
+        .loose(),
+    ),
+  })
+  .loose();
+
+export type SalespersonDashboard = z.infer<typeof salespersonDashboardSchema>;

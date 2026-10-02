@@ -1,5 +1,21 @@
-import { Page } from '@/shared/components/page';
+import { salesRoute } from '@/app/routes';
+import { SalesView } from '@/features/sales';
 
 export const SalesPage = () => {
-  return <Page title='Sales' />;
+  const { salesPersonId } = salesRoute.useSearch();
+  const navigate = salesRoute.useNavigate();
+
+  const handleSalesPersonChange = (value?: string) => {
+    navigate({
+      search: (previous) => ({ ...previous, salesPersonId: value }),
+      replace: true,
+    });
+  };
+
+  return (
+    <SalesView
+      salesPersonId={salesPersonId}
+      onSalesPersonChange={handleSalesPersonChange}
+    />
+  );
 };

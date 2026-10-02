@@ -158,6 +158,10 @@ const inventorySearchSchema = z.object({
   status: z.enum(['all', CarStatus.AVAILABLE, CarStatus.SOLD]).optional(),
 });
 
+const salesSearchSchema = z.object({
+  salesPersonId: z.uuid().optional(),
+});
+
 export const inventoryRoute = createRoute({
   getParentRoute: () => salesPersonGuard,
   path: '/inventory',
@@ -174,6 +178,7 @@ export const carDetailsRoute = createRoute({
 export const salesRoute = createRoute({
   getParentRoute: () => salesPersonGuard,
   path: '/sales',
+  validateSearch: (search) => salesSearchSchema.parse(search),
   component: SalesPage,
 });
 

@@ -17,6 +17,7 @@
     "cn": "^0.3.0",
     "lucide-react": "^1.46.0",
     "react-hook-form": "^7.88.0",
+    "recharts": "3.8.0",
     "tailwind-merge": "^3.5.0"
   },
   "peerDependencies": {

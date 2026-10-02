@@ -12,7 +12,11 @@ import { User, UserRole } from '@/user/entities/user.entity';
 
 describe('CarService', () => {
   let service: CarService;
-  let carRepository: { findOne: jest.Mock; save: jest.Mock };
+  let carRepository: {
+    findOne: jest.Mock;
+    save: jest.Mock;
+    createQueryBuilder: jest.Mock;
+  };
   let userRepository: { findOneBy: jest.Mock };
 
   const salesPerson: User = {
@@ -62,6 +66,7 @@ describe('CarService', () => {
     carRepository = {
       findOne: jest.fn(),
       save: jest.fn(),
+      createQueryBuilder: jest.fn(),
     };
     userRepository = {
       findOneBy: jest.fn(),
@@ -80,6 +85,33 @@ describe('CarService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('findAll', () => {
+    it('should filter cars by client id when provided', async () => {
+      const queryBuilder = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
+      carRepository.createQueryBuilder.mockReturnValue(queryBuilder);
+
+      await service.findAll({
+        page: 1,
+        limit: 20,
+        sortOrder: 'DESC',
+        clientId: 'client-uuid',
+      });
+
+      expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+        'client.id = :clientId',
+        { clientId: 'client-uuid' },
+      );
+    });
   });
 
   describe('sell', () => {

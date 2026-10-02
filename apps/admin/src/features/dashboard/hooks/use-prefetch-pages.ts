@@ -48,6 +48,20 @@ export const usePrefetchPages = (user: UserDetails | undefined) => {
       schema: carListSchema,
     });
 
+    prefetchGetQuery<PaginatedCars>({
+      key: QUERY_KEYS.sales,
+      url: '/sales',
+      params: { page: 1, limit: 10 },
+      schema: carListSchema,
+    });
+
+    prefetchGetQuery<PaginatedUsers>({
+      key: QUERY_KEYS.clients,
+      url: '/user/clients',
+      params: { page: 1, limit: 10 },
+      schema: userListSchema,
+    });
+
     if (isOwner) {
       prefetchGetQuery<PaginatedUsers>({
         key: QUERY_KEYS.salespeople,

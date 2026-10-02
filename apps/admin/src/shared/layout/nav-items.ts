@@ -43,7 +43,7 @@ export const navItems: NavItem[] = [
   {
     to: '/sales',
     label: 'Sales',
-    salesPersonLabel: 'My Sales',
+    salesPersonLabel: 'My sales',
     icon: ReceiptIcon,
     roles: [UserRole.Owner, UserRole.SalesPerson],
   },

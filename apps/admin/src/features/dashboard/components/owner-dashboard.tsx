@@ -6,6 +6,7 @@ import {
   type OwnerDashboard as OwnerDashboardStats,
 } from '@/shared/schemas/dashboard.schema';
 import { formatCurrency } from '@/shared/utils/format-currency';
+import { truncateLabel } from '@/shared/utils/truncate-label';
 import { useGetAllQuery } from '@repo/api';
 import { Button } from '@repo/ui/components/button';
 import {
@@ -15,15 +16,29 @@ import {
   CardTitle,
 } from '@repo/ui/components/card';
 import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@repo/ui/components/chart';
+import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
 } from '@repo/ui/components/empty';
 import { Link } from '@tanstack/react-router';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { MetricCard } from '@/shared/components/metric-card';
 import { DashboardSkeleton } from './dashboard-skeleton';
-import { MetricCard } from './metric-card';
 import { RecentSalesTable } from './recent-sales-table';
+
+const inventoryChartConfig = {
+  count: {
+    label: 'Available',
+    color: 'var(--chart-1)',
+  },
+} satisfies ChartConfig;
 
 export const OwnerDashboard = () => {
   const {
@@ -59,52 +74,52 @@ export const OwnerDashboard = () => {
     topBrands,
   } = dashboard;
 
-  const topBrandCount = topBrands[0]?.count ?? 1;
-
   return (
     <Page
-      title='Owner dashboard'
-      description='Business overview across inventory and sales.'
+      title="Owner dashboard"
+      description="Business overview across inventory and sales."
       actions={
-        <Button variant='outline' render={<Link to='/inventory' />}>
+        <Button variant="outline" render={<Link to="/inventory" />}>
           View inventory
         </Button>
       }
     >
-      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          title='Revenue'
+          title="Revenue"
           value={formatCurrency(revenue)}
           hint={`${soldCarsCount} cars sold`}
         />
         <MetricCard
-          title='Available stock'
+          title="Available stock"
           value={String(availableCarsCount)}
-          hint='Ready to sell'
+          hint="Ready to sell"
         />
         <MetricCard
-          title='Cars sold'
+          title="Cars sold"
           value={String(soldCarsCount)}
-          hint='All time'
+          hint="All time"
         />
         <MetricCard
-          title='Team size'
+          title="Team size"
           value={String(teamSize)}
-          hint='Salespeople on staff'
+          hint="Salespeople on staff"
         />
       </div>
 
-      <div className='grid gap-4 lg:grid-cols-2'>
+      <div className="grid gap-4 lg:grid-cols-2">
         <RecentSalesTable cars={recentSales} />
         <Card>
           <CardHeader>
-            <CardTitle>Available inventory by brand</CardTitle>
+            <CardTitle role="heading" aria-level={2}>
+              Available inventory by brand
+            </CardTitle>
           </CardHeader>
-          <CardContent className='flex flex-col gap-3'>
+          <CardContent>
             {topBrands.length === 0 ? (
-              <Empty className='p-6'>
+              <Empty className="p-6">
                 <EmptyHeader>
-                  <EmptyTitle className='text-sm font-medium'>
+                  <EmptyTitle className="text-sm font-medium">
                     No available cars
                   </EmptyTitle>
                   <EmptyDescription>
@@ -113,27 +128,44 @@ export const OwnerDashboard = () => {
                 </EmptyHeader>
               </Empty>
             ) : (
-              topBrands.map(({ brand, count }) => (
-                <div key={brand} className='flex items-center gap-3'>
-                  <span className='w-24 truncate text-sm'>{brand}</span>
-                  <div
-                    role='progressbar'
-                    aria-label={`${brand}: ${count} available`}
-                    aria-valuenow={count}
-                    aria-valuemin={0}
-                    aria-valuemax={topBrandCount}
-                    className='h-2 flex-1 overflow-hidden rounded-full bg-muted'
+              <>
+                <p className="sr-only">
+                  Horizontal bar chart of available inventory by brand, ranked
+                  from most to least stock.
+                </p>
+                <ChartContainer
+                  config={inventoryChartConfig}
+                  className="aspect-auto h-[240px] w-full"
+                >
+                  <BarChart
+                    accessibilityLayer
+                    data={topBrands}
+                    layout="vertical"
+                    margin={{ left: 8, right: 12 }}
                   >
-                    <div
-                      className='h-full rounded-full bg-primary'
-                      style={{ width: `${(count / topBrandCount) * 100}%` }}
+                    <CartesianGrid horizontal={false} />
+                    <XAxis
+                      type="number"
+                      allowDecimals={false}
+                      tickLine={false}
+                      axisLine={false}
                     />
-                  </div>
-                  <span className='w-8 text-right text-sm tabular-nums'>
-                    {count}
-                  </span>
-                </div>
-              ))
+                    <YAxis
+                      type="category"
+                      dataKey="brand"
+                      tickLine={false}
+                      axisLine={false}
+                      width={88}
+                      tickFormatter={truncateLabel}
+                    />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent />}
+                    />
+                    <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+                  </BarChart>
+                </ChartContainer>
+              </>
             )}
           </CardContent>
         </Card>

@@ -26,6 +26,12 @@
   --sidebar-accent-foreground: 0 0% 9%;
   --sidebar-border: 0 0% 89.8%;
   --sidebar-ring: 0 0% 3.9%;
+  --chart-1: hsl(0 0% 9%);
+  --chart-2: hsl(0 0% 45%);
+  --chart-3: hsl(0 0% 32%);
+  --chart-4: hsl(0 0% 64%);
+  --chart-5: hsl(0 0% 20%);
+  --chart-axis: hsl(0 0% 34%);
   --radius: 0.5rem;
 }
 
@@ -57,4 +63,10 @@
   --sidebar-accent-foreground: 0 0% 98%;
   --sidebar-border: 0 0% 14.9%;
   --sidebar-ring: 0 0% 83.1%;
+  --chart-1: hsl(0 0% 98%);
+  --chart-2: hsl(0 0% 64%);
+  --chart-3: hsl(0 0% 80%);
+  --chart-4: hsl(0 0% 45%);
+  --chart-5: hsl(0 0% 70%);
+  --chart-axis: hsl(0 0% 64%);
 }
